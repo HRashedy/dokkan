@@ -153,7 +153,7 @@
                                                 <div class="checkbox">
                                                     <label>
                                                         <input type="checkbox" name="status" <?php echo ($user->user_status == 1) ? "checked" : ""; ?>  />
-                                                        <span class="checkbox-material"></span>
+                                                        
                                                     </label>
                                                 </div>
                                             </div>
@@ -162,7 +162,8 @@
                                             <label class="col-md-3"></label>
                                             <div class="col-md-9">
                                                 <div class="form-group form-button">
-                                                    <button type="submit class="btn btn-fill btn-rose" ><?php echo $this->lang->line("Submit");?> </button>
+                                                    <button type="submit" class="btn btn-fill btn-rose" ><?php echo $this->lang->line("Submit");?> 
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

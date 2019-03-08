@@ -16,9 +16,9 @@ class Admin extends MY_Controller {
     }
 	public function index()
 	{
-		if(_is_user_login($this)){
-            redirect(_get_user_redirect($this));
-        }else{
+// 		if(_is_user_login($this)){
+//             redirect(_get_user_redirect($this));
+//         }else{
             
             $data = array("error"=>"");       
             if(isset($_POST))
@@ -30,8 +30,8 @@ class Admin extends MY_Controller {
                 $this->form_validation->set_rules('password', 'Password', 'trim|required');
                 if ($this->form_validation->run() == FALSE) 
         		{
-        	 if($this->form_validation->error_string()!=""){
-        	$data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                	if($this->form_validation->error_string()!=""){
+                	$data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
                                   <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                                   <strong>Warning!</strong> '.$this->form_validation->error_string().'
                                 </div>';
@@ -75,10 +75,14 @@ class Admin extends MY_Controller {
                     
                 }
             }
+            else
+            {
+                $this->session->sess_destroy();
+            }
             $data["active"] = "login";
             
             $this->load->view("admin/login",$data);
-        }
+        // }
 	}
     public function dashboard(){
         if(_is_user_login($this)){
@@ -90,7 +94,12 @@ class Admin extends MY_Controller {
             $data["nextday_orders"] = $this->product_model->get_sale_orders(" and sale.on_date = '".$nexday."' ");
             $this->load->view("admin/dashboard",$data);
         }
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function orders(){
         if(_is_user_login($this)){
             $data = array();
@@ -111,7 +120,12 @@ class Admin extends MY_Controller {
             
             $this->load->view("admin/orders/orderslist",$data);
         }
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function confirm_order($order_id){
         if(_is_user_login($this)){
             $this->load->model("product_model");
@@ -140,6 +154,10 @@ class Admin extends MY_Controller {
                                   <strong>Success!</strong> Order confirmed. </div>');
             }
             redirect("admin/orders");
+        }
+        else
+        {
+            redirect("admin");
         }
     }
     
@@ -174,7 +192,12 @@ class Admin extends MY_Controller {
             }
             redirect("admin/orders");
         }
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function cancle_order($order_id){
         if(_is_user_login($this)){
             $this->load->model("product_model");
@@ -182,7 +205,9 @@ class Admin extends MY_Controller {
             if(!empty($order)){
                 $this->db->query("update sale set status = 3 where sale_id = '".$order_id."'");
                 
-                 $q = $this->db->query("Select * from users where user_id = '".$order->user_id."'");  
+                 $q = $this->db->query("Select * from users where user_id = '".$order->user_id."'");
+                 
+                 $this->db->query("delete from sale_items where sale_id = '".$order_id."'");
                  $user = $q->row();  
                                 $message["title"] = "Cancel  Order";
                                 $message["message"] = "Your order Number '".$order->sale_id."' cancel successfully";
@@ -205,6 +230,10 @@ class Admin extends MY_Controller {
             }
             redirect("admin/orders");
         }
+        else
+        {
+            redirect("admin");
+        }
     }
     
     public function delete_order($order_id){
@@ -219,7 +248,12 @@ class Admin extends MY_Controller {
             }
             redirect("admin/orders");
         }
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function orderdetails($order_id){
         if(_is_user_login($this)){
             $data = array();
@@ -228,7 +262,12 @@ class Admin extends MY_Controller {
             $data["order_items"] = $this->product_model->get_sale_order_items($order_id);
             $this->load->view("admin/orders/orderdetails",$data);
         }
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function change_status(){
         $table = $this->input->post("table");
         $id = $this->input->post("id");
@@ -274,7 +313,8 @@ class Admin extends MY_Controller {
         $data["user_types"] = $this->users_model->get_user_type();
         $this->load->view("admin/user_types",$data);
     }
-    function user_type_delete($type_id){
+
+    public function user_type_delete($type_id){
         $data = array();
             $this->load->model("users_model");
             $usertype  = $this->users_model->get_user_type_id($type_id);
@@ -283,6 +323,7 @@ class Admin extends MY_Controller {
                 redirect("admin/user_types");
            }
     }
+
     public function user_access($user_type_id){
         if($_POST){
            //print_r($_POST);     
@@ -451,16 +492,22 @@ class Admin extends MY_Controller {
       
 /* ========== End Categories ========== */    
 /* ========== Products ==========*/
-function products(){
-        $this->load->model("product_model");
-        $data["products"]  = $this->product_model->get_products();
-        $this->load->view("admin/product/list",$data);    
-}
+    public function products(){
+        if(_is_user_login($this)){
+            $this->load->model("product_model");
+            $data["products"]  = $this->product_model->get_products();
+            $this->load->view("admin/product/list",$data); 
+        }
+        else
+            {
+                redirect("admin");
+            }
+    }
  
  
 
-function edit_products($prod_id){
-	   if(_is_user_login($this)){
+    public function edit_products($prod_id){
+	    if(_is_user_login($this)){
 	    
             if(isset($_POST))
             {
@@ -526,9 +573,10 @@ function edit_products($prod_id){
             redirect('admin');
         }
     
-}
-function add_products(){
-	   if(_is_user_login($this)){
+    }
+
+    public function add_products(){
+	    if(_is_user_login($this)){
 	    
             if(isset($_POST))
             {
@@ -595,118 +643,138 @@ function add_products(){
             redirect('admin');
         }
     
-}
-function delete_product($id){
+    }
+
+    public function delete_product($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from products where product_id = '".$id."'");
             redirect("admin/products");
         }
+        else
+        {
+            redirect("admin");
+        }
 }
 /* ========== Products ==========*/  
 /* ========== Purchase ==========*/
-public function add_purchase(){
-    if(_is_user_login($this)){
-	    
-            if(isset($_POST))
-            {
-                $this->load->library('form_validation');
-                $this->form_validation->set_rules('product_id', 'product_id', 'trim|required');
-                $this->form_validation->set_rules('qty', 'Qty', 'trim|required');
-                $this->form_validation->set_rules('unit', 'Unit', 'trim|required');
-                if ($this->form_validation->run() == FALSE)
-        		{
-        		  if($this->form_validation->error_string()!="")
-        			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-        		}
-        		else
-        		{
-      		  
-                    $this->load->model("common_model");
-                    $array = array(
-                    "product_id"=>$this->input->post("product_id"),
-                    "qty"=>$this->input->post("qty"),
-                    "price"=>$this->input->post("price"),
-                    "unit"=>$this->input->post("unit"),
-                    "store_id_login"=>$this->input->post("store_id_login")
-                    );
-                    $this->common_model->data_insert("purchase",$array);
+    public function add_purchase(){
+        if(_is_user_login($this)){
+    	    
+                if(isset($_POST))
+                {
+                    $this->load->library('form_validation');
+                    $this->form_validation->set_rules('product_id', 'product_id', 'trim|required');
+                    $this->form_validation->set_rules('qty', 'Qty', 'trim|required');
+                    $this->form_validation->set_rules('unit', 'Unit', 'trim|required');
+                    if ($this->form_validation->run() == FALSE)
+            		{
+            		  if($this->form_validation->error_string()!="")
+            			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+            		}
+            		else
+            		{
+          		  
+                        $this->load->model("common_model");
+                        $array = array(
+                        "product_id"=>$this->input->post("product_id"),
+                        "qty"=>$this->input->post("qty"),
+                        "price"=>$this->input->post("price"),
+                        "unit"=>$this->input->post("unit"),
+                        "store_id_login"=>$this->input->post("store_id_login")
+                        );
+                        $this->common_model->data_insert("purchase",$array);
+                        
+                        $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
+                                            <i class="fa fa-check"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Success!</strong> Your request added successfully...
+                                        </div>');
+                        redirect("admin/add_purchase");
+                    }
                     
-                    $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
-                                        <i class="fa fa-check"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Success!</strong> Your request added successfully...
-                                    </div>');
-                    redirect("admin/add_purchase");
-                }
-                
-                $this->load->model("product_model");
-                $data["purchases"]  = $this->product_model->get_purchase_list();
-                $data["products"]  = $this->product_model->get_products();
-                $this->load->view("admin/product/purchase",$data);  
-                
-            }
-        }
-    
-}
-function edit_purchase($id){
-    if(_is_user_login($this)){
-	    
-            if(isset($_POST))
-            {
-                $this->load->library('form_validation');
-                $this->form_validation->set_rules('product_id', 'product_id', 'trim|required');
-                $this->form_validation->set_rules('qty', 'Qty', 'trim|required');
-                $this->form_validation->set_rules('unit', 'Unit', 'trim|required');
-                if ($this->form_validation->run() == FALSE)
-        		{
-        		  if($this->form_validation->error_string()!="")
-        			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-        		}
-        		else
-        		{
-      		  
-                    $this->load->model("common_model");
-                    $array = array(
-                    "product_id"=>$this->input->post("product_id"),
-                    "qty"=>$this->input->post("qty"),
-                    "price"=>$this->input->post("price"),
-                    "unit"=>$this->input->post("unit")
-                    );
-                    $this->common_model->data_update("purchase",$array,array("purchase_id"=>$id));
+                    $this->load->model("product_model");
+                    $data["purchases"]  = $this->product_model->get_purchase_list();
+                    $data["products"]  = $this->product_model->get_products();
+                    $this->load->view("admin/product/purchase",$data);  
                     
-                    $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
-                                        <i class="fa fa-check"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Success!</strong> Your request added successfully...
-                                    </div>');
-                    redirect("admin/add_purchase");
                 }
-                
-                $this->load->model("product_model");
-                $data["purchase"]  = $this->product_model->get_purchase_by_id($id);
-                $data["products"]  = $this->product_model->get_products();
-                $this->load->view("admin/product/edit_purchase",$data);  
-                
-            }
         }
-}
-function delete_purchase($id){
+        else
+        {
+            redirect("admin");
+        }
+        
+    }
+
+    public function edit_purchase($id){
+        if(_is_user_login($this)){
+    	    
+                if(isset($_POST))
+                {
+                    $this->load->library('form_validation');
+                    $this->form_validation->set_rules('product_id', 'product_id', 'trim|required');
+                    $this->form_validation->set_rules('qty', 'Qty', 'trim|required');
+                    $this->form_validation->set_rules('unit', 'Unit', 'trim|required');
+                    if ($this->form_validation->run() == FALSE)
+            		{
+            		  if($this->form_validation->error_string()!="")
+            			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+            		}
+            		else
+            		{
+          		  
+                        $this->load->model("common_model");
+                        $array = array(
+                        "product_id"=>$this->input->post("product_id"),
+                        "qty"=>$this->input->post("qty"),
+                        "price"=>$this->input->post("price"),
+                        "unit"=>$this->input->post("unit")
+                        );
+                        $this->common_model->data_update("purchase",$array,array("purchase_id"=>$id));
+                        
+                        $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
+                                            <i class="fa fa-check"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Success!</strong> Your request added successfully...
+                                        </div>');
+                        redirect("admin/add_purchase");
+                    }
+                    
+                    $this->load->model("product_model");
+                    $data["purchase"]  = $this->product_model->get_purchase_by_id($id);
+                    $data["products"]  = $this->product_model->get_products();
+                    $this->load->view("admin/product/edit_purchase",$data);  
+                    
+                }
+        }
+        else
+        {
+            redirect("admin");
+        }
+    }
+
+    public function delete_purchase($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from purchase where purchase_id = '".$id."'");
             redirect("admin/add_purchase");
         }
-}
+        else
+        {
+            redirect("admin");
+        }
+    }
 /* ========== Purchase END ==========*/
+
     public function socity(){
-    if(_is_user_login($this)){
+        if(_is_user_login($this)){
 	    
             if(isset($_POST))
             {
@@ -750,10 +818,14 @@ function delete_purchase($id){
                 
             }
         }
+        else
+        {
+            redirect("admin");
+        }
         
     }
     public function edit_socity($id){
-    if(_is_user_login($this)){
+        if(_is_user_login($this)){
 	    
             if(isset($_POST))
             {
@@ -797,27 +869,39 @@ function delete_purchase($id){
                 
             }
         }
+        else
+        {
+            redirect("admin");
+        }
         
     }
-    function delete_socity($id){
+    public function delete_socity($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from socity where socity_id = '".$id."'");
             redirect("admin/socity");
         }
+        else
+        {
+            redirect("admin");
+        }
     }
-    function registers(){
+
+    public function registers(){
         if(_is_user_login($this)){
             $this->load->model("product_model");
             $users = $this->product_model->get_all_users();
             $this->load->view("admin/allusers",array("users"=>$users));
         }
+        else
+        {
+            redirect("admin");
+        }
     }
  
  /* ========== Page app setting =========*/
-public function addpage_app()
-	{
-	   if(_is_user_login($this))
-       {
+    public function addpage_app(){
+	    if(_is_user_login($this))
+        {
 	       
             $data["error"] = "";
             $data["active"] = "addpageapp"; 
@@ -849,7 +933,7 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
     }
     
@@ -866,9 +950,10 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
     }
+
     public function editpage_app($id)
 	{
 	   if(_is_user_login($this)){
@@ -906,9 +991,10 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
     }
+
     public function deletepageapp($id)
 	{
 	   if(_is_user_login($this)){
@@ -923,80 +1009,93 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
     }
 
 /* ========== End page page setting ========*/
 
- public function setting(){
-    if(_is_user_login($this)){
-	      $this->load->model("setting_model"); 
-                $data["settings"]  = $this->setting_model->get_settings(); 
-              
-                $this->load->view("admin/setting/settings",$data);  
+    public function setting(){
+        if(_is_user_login($this)){
+    	      $this->load->model("setting_model"); 
+                    $data["settings"]  = $this->setting_model->get_settings(); 
+                  
+                    $this->load->view("admin/setting/settings",$data);  
+                    
                 
-            
+        }
+        else
+        {
+            redirect("admin");
         }
     }
- public function edit_settings($id){
-    if(_is_user_login($this)){
-	    
-            if(isset($_POST))
-            {
-                $this->load->library('form_validation');
-                 
-                $this->form_validation->set_rules('value', 'Amount', 'trim|required');
-                if ($this->form_validation->run() == FALSE)
-        		{
-        		  if($this->form_validation->error_string()!="")
-        			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-        		}
-        		else
-        		{
-      		  
-                    $this->load->model("common_model");
-                    $array = array(
-                    "title"=>$this->input->post("title"), 
-                    "value"=>$this->input->post("value")
-                    );
+
+    public function edit_settings($id){
+        if(_is_user_login($this)){
+    	    
+                if(isset($_POST))
+                {
+                    $this->load->library('form_validation');
+                     
+                    $this->form_validation->set_rules('value', 'Amount', 'trim|required');
+                    if ($this->form_validation->run() == FALSE)
+            		{
+            		  if($this->form_validation->error_string()!="")
+            			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+            		}
+            		else
+            		{
+          		  
+                        $this->load->model("common_model");
+                        $array = array(
+                        "title"=>$this->input->post("title"), 
+                        "value"=>$this->input->post("value")
+                        );
+                        
+                        $this->common_model->data_update("settings",$array,array("id"=>$id));
+                        
+                        $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
+                                            <i class="fa fa-check"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Success!</strong> Your request added successfully...
+                                        </div>');
+                        redirect("admin/setting");
+                    }
                     
-                    $this->common_model->data_update("settings",$array,array("id"=>$id));
+                    $this->load->model("setting_model");
+                    $data["editsetting"]  = $this->setting_model->get_setting_by_id($id);
+                    $this->load->view("admin/setting/edit_settings",$data);  
                     
-                    $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
-                                        <i class="fa fa-check"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Success!</strong> Your request added successfully...
-                                    </div>');
-                    redirect("admin/setting");
                 }
-                
-                $this->load->model("setting_model");
-                $data["editsetting"]  = $this->setting_model->get_setting_by_id($id);
-                $this->load->view("admin/setting/edit_settings",$data);  
-                
-            }
         }
-        
+        else
+        {
+            redirect("admin");
+        }
     }
     
-    function stock(){
+    public function stock(){
         if(_is_user_login($this)){
             $this->load->model("product_model");
             $data["stock_list"] = $this->product_model->get_leftstock();
             $this->load->view("admin/product/stock",$data);
         }
+        else
+        {
+            redirect("admin");
+        }
     }
 /* ========== End page page setting ========*/
-   function testnoti(){
+   public function testnoti(){
         $token =  "flbcqPKhZSk:APA91bE1akFG5ixG8DS8E1rG0tza67cTzwaohJm5NjrDu0HqZfmHKsBOubtu78njQNuTLHr5lbFtd888FmazUVzmD6wSZ6IJPSM9gaYOfVLvcESVrqvo0qaZgNi4lVqteM1xgzQe5-yL";
     }
-     function notification(){
-         if(_is_user_login($this)){
+
+    public function notification(){
+        if(_is_user_login($this)){
 	    
             if(isset($_POST))
             {
@@ -1047,10 +1146,13 @@ public function addpage_app()
                 
             }
         }
-        
+        else
+        {
+            redirect("admin");
+        }    
     }
     
-    function time_slot(){
+    public function time_slot(){
         if(_is_user_login($this)){
                 $this->load->model("time_model");
                 $timeslot = $this->time_model->get_time_slot();
@@ -1079,45 +1181,58 @@ public function addpage_app()
             $timeslot = $this->time_model->get_time_slot();
             $this->load->view("admin/timeslot/edit",array("schedule"=>$timeslot));
         }
+        else
+        {
+            redirect("admin");
+        }
     }
-    function closing_hours(){
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('date', 'Date', 'trim|required');
-                $this->form_validation->set_rules('opening_time', 'Start Hour', 'trim|required');
-                $this->form_validation->set_rules('closing_time', 'End Hour', 'trim|required');
-                if ($this->form_validation->run() == FALSE)
-        		{
-        		  if($this->form_validation->error_string()!="")
-        			  $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-        		}
-        		else
-        		{
-        		      $array = array("date"=>date("Y-m-d",strtotime($this->input->post("date"))),
-                      "from_time"=>date("H:i:s",strtotime($this->input->post("opening_time"))),
-                      "to_time"=>date("H:i:s",strtotime($this->input->post("closing_time")))
-                      ); 
-                      $this->db->insert("closing_hours",$array); 
-                }
-        
-         $this->load->model("time_model");
-         $timeslot = $this->time_model->get_closing_date(date("Y-m-d"));
-         $this->load->view("admin/timeslot/closing_hours",array("schedule"=>$timeslot));
-         
-                        
+
+    public function closing_hours(){
+        if(_is_user_login($this)){
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('date', 'Date', 'trim|required');
+                    $this->form_validation->set_rules('opening_time', 'Start Hour', 'trim|required');
+                    $this->form_validation->set_rules('closing_time', 'End Hour', 'trim|required');
+                    if ($this->form_validation->run() == FALSE)
+                    {
+                      if($this->form_validation->error_string()!="")
+                          $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+                    }
+                    else
+                    {
+                          $array = array("date"=>date("Y-m-d",strtotime($this->input->post("date"))),
+                          "from_time"=>date("H:i:s",strtotime($this->input->post("opening_time"))),
+                          "to_time"=>date("H:i:s",strtotime($this->input->post("closing_time")))
+                          ); 
+                          $this->db->insert("closing_hours",$array); 
+                    }
+            
+             $this->load->model("time_model");
+             $timeslot = $this->time_model->get_closing_date(date("Y-m-d"));
+             $this->load->view("admin/timeslot/closing_hours",array("schedule"=>$timeslot));
+        }
+        else
+        {
+            redirect("admin");
+        }
     }
     
      
-     function delete_closing_date($id){
+    public function delete_closing_date($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from closing_hours where id = '".$id."'");
             redirect("admin/closing_hours");
         }
-    
+        else
+        {
+            redirect("admin");
+        }
     }
+
     public function addslider()
 	{
 	   if(_is_user_login($this)){
@@ -1181,11 +1296,11 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
 	}
  
-     public function listslider()
+    public function listslider()
 	{
 	   if(_is_user_login($this)){
 	       $data["error"] = "";
@@ -1196,13 +1311,14 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
     }
-     public function editslider($id)
+
+    public function editslider($id)
 	{
-	   if(_is_user_login($this))
-       {
+	    if(_is_user_login($this))
+        {
             
             $this->load->model("slider_model");
            $data["slider"] = $this->slider_model->get_slider_by_id($id);
@@ -1239,11 +1355,12 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect("admin");
         }
 	}
-     function deleteslider($id){
-        $data = array();
+    public function deleteslider($id){
+        if(_is_user_login($this)){
+            $data = array();
             $this->load->model("slider_model");
             $slider  = $this->slider_model->get_slider_by_id($id);
            if($slider){
@@ -1251,6 +1368,11 @@ public function addpage_app()
                 unlink("uploads/sliders/".$slider->slider_image);
                 redirect("admin/listslider");
            }
+        }
+        else
+        {
+            redirect("admin");
+        }
     }  
    
 }

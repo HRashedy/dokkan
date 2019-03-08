@@ -17,7 +17,12 @@ class Users extends MY_Controller {
             $data["users"] = $this->users_model->get_alluser();
             $this->load->view("users/list2",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
     }
+
     public function add_user(){
         if(_is_user_login($this)){
             $data = array();
@@ -85,9 +90,9 @@ class Users extends MY_Controller {
                                 "user_city"=>$user_city));
                                 
                                 
-         $this->session->set_flashdata("message", '<div class="alert alert-success alert-dismissible" role="alert">
- <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span>
- <span class="sr-only">Close</span></button>
+                         $this->session->set_flashdata("message", '<div class="alert alert-success alert-dismissible" role="alert">
+                                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span>
+                                         <span class="sr-only">Close</span></button>
                                   <strong>Success!</strong> User Added Successfully
                                 </div>');
                         
@@ -97,7 +102,12 @@ class Users extends MY_Controller {
             $data["user_types"] = $this->users_model->get_user_type();
             $this->load->view("users/add_user2",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
     }
+
     public function edit_user($user_id){
         if(_is_user_login($this)){
             $data = array();
@@ -142,7 +152,7 @@ class Users extends MY_Controller {
                                     {
                                         $img_data = $this->upload->data();
                                         //$array["user_image"]=$img_data['file_name'];
-                                        $image=$img_data['file_name'];
+                                        $image=base_url()."/uploads/profile/".$img_data['file_name'];
                                     }
                                     
                                     $update_array = array(
@@ -189,6 +199,10 @@ class Users extends MY_Controller {
             
             $this->load->view("users/edit_user2",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
     }
     
     public function edit_mainuser($user_id){
@@ -215,11 +229,11 @@ class Users extends MY_Controller {
                 }else
                 {
                         $user_fullname = $this->input->post("user_fullname");
-                           $emp_fullname = $this->input->post("emp_fullname");
+                        $emp_fullname = $this->input->post("emp_fullname");
                         $user_email = $this->input->post("user_email");
                         $user_password = $this->input->post("user_password");
-                         $user_phone = $this->input->post("mobile"); 
-                          $user_city = $this->input->post("city");
+                        $user_phone = $this->input->post("mobile"); 
+                        $user_city = $this->input->post("city");
                         $status = ($this->input->post("status")=="on")? 1 : 0;
                         
                         if($_FILES["pro_pic"]["size"] > 0)
@@ -276,7 +290,7 @@ class Users extends MY_Controller {
                                   <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                                   <strong>Success!</strong> User Added Successfully
                                 </div>');
-                                redirect("users");
+                                redirect("admin/dashboard");
                         
                 }
             }
@@ -284,19 +298,29 @@ class Users extends MY_Controller {
             
             $this->load->view("users/edit_user2",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
     }
     
-    function delete_user($user_id){
-        $data = array();
+    public function delete_user($user_id){
+        if(_is_user_login($this)){
+            $data = array();
             $this->load->model("users_model");
             $user  = $this->users_model->get_user_by_id($user_id);
-           if($user){
+            if($user){
                 $this->db->query("Delete  from store_login where user_id = '".$user_id."'");
                 redirect("users");
-           }
+            }
+        }
+        else
+        {
+            redirect('admin');
+        }
     }
     
-    function modify_password($token){
+    public function modify_password($token){
         $data = array();
         $q = $this->db->query("Select * from users where varified_token = '".$token."' limit 1");
         if($q->num_rows() > 0){
@@ -328,7 +352,7 @@ class Users extends MY_Controller {
         }
     }
     
-     public function sales_rep_list()
+    public function sales_rep_list()
     {
         if(_is_user_login($this)){
             $data = array();
@@ -337,6 +361,11 @@ class Users extends MY_Controller {
             $data["users"] = $q->result();
             $this->load->view("users/sales_rep_list",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
+
     }
     
     public function add_sales_rep(){
@@ -417,6 +446,10 @@ class Users extends MY_Controller {
             
             $data["user_types"] = $this->users_model->get_user_type();
             $this->load->view("users/add_sale_rep",$data);
+        }
+        else
+        {
+            redirect('admin');
         }
     }
     
@@ -501,7 +534,10 @@ class Users extends MY_Controller {
             
             $this->load->view("users/edit_sales_rep",$data);
         }
-        
+        else
+        {
+            redirect('admin');
+        }
     }
     
     public function assing_sales(){
@@ -588,31 +624,10 @@ class Users extends MY_Controller {
             $data["user_types"] = $this->users_model->get_user_type();
             $this->load->view("users/assgin_sales",$data);
         }
+        else
+        {
+            redirect('admin');
+        }
     }
     
-    
-    public function gogo()
-        {
-            $mapLat="";
-            $mapLong="";
-            $location='Suraj Kund, Dayal Bagh Colony, Faridabad, Haryana';
-            if($mapLat =='' && $mapLong ==''){
-                // Get lat long from google
-                $latlong    =   testing($location); // create a function with the name "get_lat_long" given as below
-                $map        =   explode(',' ,$latlong);
-                $mapLat         =   $map[0];
-                $mapLong    =   $map[1];    
-            }
-                
-        }
-    public function fff(){
-
-            $address = 'Suraj Kund, Dayal Bagh Colony, Faridabad, Haryana';
-           $geocode=file_get_contents('http://maps.google.com/maps/api/geocode/json?address=$address&key=AIzaSyA2wZe-f96IoOb3YWz3BzCe76t0SS7HwPw');
-
-                $output= json_decode($geocode);
-                
-                $lat = $output->results[0]->geometry->location->lat;
-                $long = $output->results[0]->geometry->location->lng;
-            }
 }

@@ -530,7 +530,7 @@ public function login(){
                      {
                         $total_price=$this->input->post("total_ammount");
                      }
-                     $total_price = $total_price + $location->delivery_charge;
+                     //$total_price = $total_price + $location->delivery_charge;
 
                     $this->db->query("Update sale set total_amount = '".$total_price."', total_kg = '".$total_kg."', total_items = '".count($total_items)."', total_rewards = '".$total_rewards."' where sale_id = '".$id."'");
                     
@@ -599,7 +599,8 @@ public function login(){
                     
                 }else
                 {
-                    $this->db->query("Update sale set status = 3 where user_id = '".$this->input->post("user_id")."' and  sale_id = '".$this->input->post("sale_id")."' ");    
+                    $this->db->query("Update sale set status = 3 where user_id = '".$this->input->post("user_id")."' and  sale_id = '".$this->input->post("sale_id")."' ");
+                    $this->db->delete('sale_items', array('sale_id' => $this->input->post("sale_id"))); 
                     $data["responce"] = true;
                     $data["message"] = "Your order cancel successfully";
                 }
@@ -886,36 +887,41 @@ public function login(){
             $this->load->library('form_validation');
             $this->form_validation->set_rules('email', 'Email', 'trim|required');
             if ($this->form_validation->run() == FALSE) 
-        {
-                  $data["responce"] = false;  
-                  $data["error"] = 'Warning! : '.strip_tags($this->form_validation->error_string());
-                        
-        }else
+            {
+                      $data["responce"] = false;  
+                      $data["error"] = 'Warning! : '.strip_tags($this->form_validation->error_string());
+                            
+            }
+            else
             {
                    $request = $this->db->query("Select * from registers where user_email = '".$this->input->post("email")."' limit 1");
                    if($request->num_rows() > 0){
                                 
                                 $user = $request->row();
-                                $token = uniqid(uniqid());
-                                $this->db->update("registers",array("varified_token"=>$token),array("user_id"=>$user->user_id)); 
-                                $this->load->library('email');
-                               // $this->email->from($this->config->item('default_email'), $this->config->item('email_host'));
+                                //$token = uniqid(uniqid());
+                                //$this->db->update("registers",array("varified_token"=>$token),array("user_id"=>$user->user_id)); 
+                                //$this->load->library('email');
+                                //$this->email->from($this->config->item('default_email'), $this->config->item('email_host'));
                                 
-                                $email = $user->user_email;
-                                 $name = $user->user_fullname;
-                                 $return = $this->send_email_verified_mail($email,$token,$name);
+                                $code=mt_rand(1000,9999);
+                                $email=$this->input->post('email');
                                 
-                                 
+                                $update=$this->db->query("UPDATE `registers` SET user_password='".md5($code)."' where user_email='".$email."' "); 
+                                // $email = $user->user_email;
+                                // $name = $user->user_fullname;
+                                //$return = $this->send_email_verified_mail($email,$token,$name);
+                                
+                                
                                
-                                if (!$return){
-                                    $data["responce"] = false;  
-                                    $data["error"] = 'Warning! : Something is wrong with system to send mail.';
-                                    $data["error_arb"] = 'خطـأ! : لا يوجد مستخدم مسجل بهذا البريد الإلكتروني.';
-    
-                                }else{
-                                    $data["responce"] = true;  
-                                    $data["error"] = 'Success! : Recovery mail sent to your email address please verify link.';
+                                if ($update){
+                                    $data["responce"] = true;
+                                    $data["error"] = 'Success! : New Password : '.$code;
                                     $data["error_arb"] = 'نجاح! : أرسل البريد الاسترداد إلى عنوان البريد الإلكتروني الخاص بك يرجى التحقق من الارتباط.';
+                                }else{
+                                    $data["responce"] = false;  
+                                    $data["error"] = 'Warning! : Something is wrong with system.';
+                                    $data["error_arb"] = 'خطـأ!. : لا يوجد مستخدم مسجل بهذا البريد الإلكتروني.';
+                                      
                                 }
                    }else{
                          $data["responce"] = false;  
@@ -928,19 +934,17 @@ public function login(){
         
         
         public function send_email_verified_mail($email,$token,$name){
-          //$message = $this->load->view('emails/email_verify',array("name"=>$name,"active_link"=>site_url("users/verify_email?email=".$email."&token=".$token)),TRUE);
-          
-           
-                    
-                            $this->email->from("saurabh.rawat@tecmanic.com","Grocery Store");
-                            $list = array($email);
-                            $this->email->to($list); 
-                             $this->email->reply_to("saurabh.rawat@tecmanic.com","Grocery Store");
-                            $this->email->subject('Forgot password request');
-                            $this->email->message("Hi ".$name." \n Your password forgot request is accepted plase visit following link to change your password. \n
-                                ".site_url("users/modify_password/".$token)."
-                                ");
-                           return $this->email->send();
+          $message = $this->load->view('users/modify_password',array("name"=>$name,"active_link"=>site_url("users/verify_email?email=".$email."&token=".$token)),TRUE);
+                            
+                            $config['mailtype'] = 'html';
+                			$this->email->initialize($config);
+                			$this->email->to($email);
+                			$this->email->from('saurabh.rawat@tecmanic.com','Saurabh Rawat');
+                			$this->email->subject('Forgot password request');
+                			$this->email->message('Hi '.$name.' \n Your password forgot request is accepted plase visit following link to change your password. \n
+                                '.base_url().'users/modify_password/'.$token);
+                                
+                            return $this->email->send();
                       
     }
     /* End Forgot Password */   
@@ -1225,7 +1229,11 @@ public function login(){
     $_POST = $_REQUEST;
     error_reporting(0);
      
-    $q = $this->db->query("SELECT dp.*,p.*,c.title from deal_product dp inner JOIN products p on dp.product_name = p.product_name INNER JOIN categories c on c.id=p.category_id limit 4");
+    $q = $this->db->query("SELECT deal_product.*,products.*,categories.title from deal_product 
+inner JOIN products on deal_product.product_name = products.product_name 
+INNER JOIN categories on categories.id=products.category_id limit 4");
+    
+    // $this->db->query("SELECT dp.*,p.*,c.title from deal_product dp inner JOIN products p on dp.product_name = p.product_name INNER JOIN categories c on c.id=p.category_id limit 4");
    
     $data['responce']="true";
   // $data['Deal_of_the_day']=array();
@@ -1294,16 +1302,26 @@ public function login(){
    
     if($this->input->post('dealproduct'))
     {
-      $q = $this->db->query("SELECT dp.*,p.*,c.title from deal_product dp inner JOIN products p on dp.product_name = p.product_name INNER JOIN categories c on c.id=p.category_id");
+      $q = $this->db->query("Select dp.*,products.*, ( ifnull (producation.p_qty,0) - ifnull(consuption.c_qty,0)) as stock ,categories.title from deal_product dp
+			left join  products on products.product_name=dp.product_name
+            inner join categories on categories.id = products.category_id
+            left outer join (select SUM(qty) as c_qty,product_id from sale_items group by product_id) as consuption on consuption.product_id = products.product_id 
+            left outer join(select SUM(qty) as p_qty,product_id from purchase group by product_id) as producation on producation.product_id = products.product_id
+            where 1 ".$filter." ".$limit);
+      
+      
+    //   $this->db->query("SELECT dp.*,p.*,c.title from deal_product dp 
+    //   inner JOIN products p on dp.product_name = p.product_name 
+    //   INNER JOIN categories c on c.id=p.category_id");
    }
     $data['responce']="true";
    //$data['Deal_of_the_day'][]=array();
     foreach ($q->result() as $product) {
-     $present = date('m/d/Y h:i:s a', time());
+     $present = date('d/m/Y H:i:s ', time());
                       $date1 = $product->start_date." ".$product->start_time;
                       $date2 = $product->end_date." ".$product->end_time;
 
-                     if(strtotime($date1) <= strtotime($present) && strtotime($present) <=strtotime($date2))
+                     if($date1 <= $present&&$present <=$date2)
                      {
                         
                        if(empty($product->deal_price))   ///Runing
@@ -1313,16 +1331,18 @@ public function login(){
                              $price= $product->deal_price;
                        }
                     
-                     }else{
+                     }
+                     else{
                       $price= $product->price;//expired
                      } 
+                     
         
       $data['Deal_of_the_day'][] = array(
             'product_id' => $product->product_id,
             'product_name'=> $product->product_name,
             'product_name_arb'=> $product->product_arb_name,
             'product_description_arb'=>$product->product_arb_description,
-            'category_id' => '0',
+            'category_id' =>$product->category_id,
             'product_description'=>$product->product_description,
             'deal_price'=>$product->deal_price,
             'start_date'=>$product->start_date,
@@ -1332,13 +1352,13 @@ public function login(){
             'mrp'=>$product->mrp,
             'price' =>  $price,
             'product_image'=>$product->product_image,
-            'status' => '',
+            'status' =>$product->in_stock,
             'in_stock' =>$product->in_stock,
             'unit_value'=>$product->unit_value,
             'unit'=>$product->unit,
             'increament'=>$product->increament,
             'rewards'=>$product->rewards,
-            'stock' =>'0',
+            'stock' =>$product->stock,
             'title'=>$product->title
            
         );

@@ -75,8 +75,12 @@ if($this->session->userdata('language') == "arabic")
             <div class="sidebar-wrapper">
                 <div class="user">
                     <div class="photo">
-                        
-                        <img src="<?php echo base_url("img/user2-160x160.jpg"); ?>" />
+                        <?php
+                          $q = $this->db->query("Select * from `store_login` where `user_id`='"._get_current_user_id($this)."'");
+                          $row=$q->row();
+                          
+                        ?>
+                        <img src="<?= $row->user_image; ?>" />
                         
                     </div>
                     <div class="info">
@@ -100,7 +104,7 @@ if($this->session->userdata('language') == "arabic")
                     </div>
                 </div>
                 <ul class="nav ">
-                    <li class="header"> <?php echo $this->lang->line("MAIN NAVIGATION");?></li>
+                    <li class="header"> </li>
             <li class="active treeview">
               <a href="<?php echo site_url("admin/dashboard"); ?>">
                 <i class="fa fa-dashboard"></i> <span> <?php echo $this->lang->line("Dashboard");?></span>

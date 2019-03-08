@@ -27,6 +27,24 @@
         }
         #ui-datepicker-div{
             background-color: #fff;
+            padding:20px;
+        }
+        a.ui-datepicker-next.ui-corner-all {
+            float: right;
+        }
+        .ui-datepicker-title
+        {
+            text-align:center;
+        }
+        th {
+            text-align: center;
+            padding:4px;
+        }
+        .ui-datepicker-next::after {
+          content: " >>";
+        }
+        .ui-datepicker-prev::before {
+          content: " <<";
         }
     </style>
 </head>

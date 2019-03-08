@@ -22,12 +22,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://dokkan/store/';
+$config['base_url'] = 'http://dokkan/store';
 $config['theme_admin'] = "theme/admin";
 
  $config['currency'] = 'Rs.';
  
-$config['default_email'] = "";
+$config['default_email'] = "admin@dokkanhouse.com";
 $config['email_host'] = "";
 
 $config['company_title'] = 'DOKKAN';
@@ -517,3 +517,4 @@ $config['rewrite_short_tags'] = FALSE;
 | Array:		array('10.0.1.200', '192.168.5.0/24')
 */
 $config['proxy_ips'] = '';
+

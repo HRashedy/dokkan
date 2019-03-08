@@ -158,7 +158,8 @@
                                             <div class="col-md-9">
                                                 <div class="form-group label-floating is-empty">
                                                     <label class="control-label"></label>
-                                                <input type="radio" name="prod_status" value="1"  checked/><label><?php echo $this->lang->line("In Stock");?></label>
+                                                <input type="radio" name="prod_status" value="1"  checked/>
+                                                <label style="margin-left:20px"><?php echo $this->lang->line("In Stock");?></label>
                                                 <span class="material-input"></span></div>
                                             </div>
                                         </div>
@@ -166,7 +167,8 @@
                                             <div class="col-md-9">
                                                 <div class="form-group label-floating is-empty">
                                                     <label class="control-label"></label>
-                                                <input type="radio" name="prod_status"  value="0" /><label><?php echo $this->lang->line("Deactive");?></label>
+                                                <input type="radio" name="prod_status"  value="0"  />
+                                                <label style="margin-left:20px"><?php echo $this->lang->line("Deactive"); ?></label>
                                                 <span class="material-input"></span></div>
                                             </div>
                                         </div>

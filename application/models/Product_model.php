@@ -147,10 +147,10 @@ class Product_model extends CI_Model{
       }
       
       function get_purchase_list(){
-        $q = $this->db->query("SELECT purchase. * , products.product_name, users.user_fullname FROM purchase
-INNER JOIN users ON purchase.store_id_login = users.user_id
-INNER JOIN products ON products.product_id = purchase.product_id
-WHERE 1 ");
+        $q = $this->db->query("SELECT purchase. * , products.product_name, users.user_fullname, store_login.user_fullname FROM purchase
+LEFT JOIN products ON products.product_id = purchase.product_id
+LEFT JOIN users ON purchase.store_id_login = users.user_id
+LEFT JOIN store_login ON purchase.store_id_login = store_login.user_id");
             return $q->result();
             
       }

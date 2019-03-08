@@ -29,7 +29,7 @@
                         <script>
                             document.write(new Date().getFullYear())
                         </script>
-                        <a href="http://dokkan.com.sa/" style="color:orange;font-weight:600">Dokkan</a>
+                        <a href="http://dokkanhouse.com/" style="color:orange;font-weight:600">DOKKAN</a>
                     </p>
                 </div>
             </footer>

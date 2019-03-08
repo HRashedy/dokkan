@@ -123,7 +123,7 @@
                                 <div class="form-group">
                                     <div class="checkbox">
                                       <label for="status">
-                                        <input type="checkbox" id="status" name="status"  /> Status
+                                        <input type="checkbox" id="status" name="status"  /> Status2
                                       </label>
                                     </div>
                                 </div>

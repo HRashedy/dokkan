@@ -463,6 +463,8 @@ $lang['language Setting'] = "Language Setting";
 $lang['City'] = "City";
 $lang['City List'] = "City List";
 $lang['City Name'] = "City Name";
+$lang['Update Product'] = "Update Product";
+$lang['Update Coupon'] = "Update Coupon";
 
 /* End of file ps_lang.php */
 /* Location: ./system/language/english/ps_lang.php */

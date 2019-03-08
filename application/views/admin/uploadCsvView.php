@@ -30,7 +30,7 @@
                         if(!empty($success)) { echo $success; }
                     ?>
                     <div class="row">
-                        <form action="<?php echo site_url();?>csv/uploadData" method="post" enctype="multipart/form-data" name="form1" id="form1" class="form-horizontal" >
+                        <form action="<?php echo site_url();?>/csv/uploadData" method="post" enctype="multipart/form-data" name="form1" id="form1" class="form-horizontal" >
                         <div class="col-md-9">
                             <div class="card">
                                 <div class="card-header card-header-icon" data-background-color="rose">

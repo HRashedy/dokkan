@@ -139,7 +139,7 @@
                                         </div>
                                         </div>
                                         <div class="row">
-                                            <label class="col-md-3 label-on-left"><?php echo $this->lang->line("Status");?></label>
+                                            <label class="col-md-3 label-on-left" for="status"><?php echo $this->lang->line("Status");?></label>
                                             <div class="col-md-9">
                                                 <div class="checkbox">
                                                     <label>

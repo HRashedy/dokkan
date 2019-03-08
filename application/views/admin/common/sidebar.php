@@ -65,6 +65,15 @@ if($this->session->userdata('language') == "arabic")
     }
     
 </style>
+<style>
+    li.active:focus{ border:none; }
+    
+    .wrapper {
+    position: relative;
+    top: 0;
+    height: 109vh !important;
+}
+</style>
 <?php
 }
 ?>

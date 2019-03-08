@@ -135,23 +135,47 @@
                                                 <span class="material-input"></span></div>
                                             </div>
                                         </div>
+                                        
                                         <div class="row">
                                             <label class="col-md-3 label-on-left"><?php echo $this->lang->line("Product Image");?>:</label>
                                             <div class="col-md-9">
-                                                <div>
-                                                    <span class="btn btn-rose btn-round btn-file">
-                                                        <span class="fileinput-new"><?php echo $this->lang->line("Select image");?></span>
-                                                        <span class="fileinput-exists"><?php echo $this->lang->line("Change");?></span>
-                                                        <input type="file" name="prod_img">
-                                                    <div class="ripple-container"></div></span>
+                                                <legend></legend>
+                                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                                    <div class="fileinput-new thumbnail">
+                                                        <img width="100%" height="100%" src="<?= base_url('uploads/products/'.$product->product_image); ?>" />
+                                                    </div>
+                                                    <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                                    <div>
+                                                        <span class="btn btn-rose btn-round btn-file">
+                                                            <span class="fileinput-new"><?php echo $this->lang->line("Select image");?></span>
+                                                            <span class="fileinput-exists"><?php echo $this->lang->line("Change");?></span>
+                                                            <input type="file" name="prod_img">
+                                                        </span>
+                                                        <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput"><i class="fa fa-times"></i> <?php echo $this->lang->line("Remove");?></a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        
+                                        
+                                        <!--<div class="row">-->
+                                        <!--    <label class="col-md-3 label-on-left"><?php echo $this->lang->line("Product Image");?>:</label>-->
+                                        <!--    <div class="col-md-9">-->
+                                        <!--        <div>-->
+                                        <!--            <span class="btn btn-rose btn-round btn-file">-->
+                                        <!--                <span class="fileinput-new"><?php echo $this->lang->line("Select image");?></span>-->
+                                        <!--                <span class="fileinput-exists"><?php echo $this->lang->line("Change");?></span>-->
+                                        <!--                <input type="file" name="prod_img">-->
+                                        <!--            <div class="ripple-container"></div></span>-->
+                                        <!--        </div>-->
+                                        <!--    </div>-->
+                                        <!--</div>-->
                                         <div class="row">
                                             <div class="col-md-9">
                                                 <div class="form-group label-floating is-empty">
                                                     <label class="control-label"></label>
-                                                <input type="radio" name="prod_status" value="1"  <?php if($product->in_stock == 1){ echo "checked"; } ?> /><label><?php echo $this->lang->line("In Stock");?></label>
+                                                <input type="radio" id="prod_status" name="prod_status" value="1"  <?php if($product->in_stock == 1){ echo "checked"; } ?> />
+                                                <label for="prod_status" style="margin-left:20px"><?php echo $this->lang->line("In Stock");?></label>
                                                 <span class="material-input"></span></div>
                                             </div>
                                         </div>
@@ -159,7 +183,8 @@
                                             <div class="col-md-9">
                                                 <div class="form-group label-floating is-empty">
                                                     <label class="control-label"></label>
-                                                <input type="radio" name="prod_status"  value="0" <?php if($product->in_stock == 0){ echo "checked"; } ?> /><label><?php echo $this->lang->line("Deactive");?></label>
+                                                <input type="radio" id="prod_status" name="prod_status"  value="0" <?php if($product->in_stock == 0){ echo "checked"; } ?> />
+                                                <label for"prod_status" style="margin-left:20px"><?php echo $this->lang->line("Deactive");?></label>
                                                 <span class="material-input"></span></div>
                                             </div>
                                         </div>
@@ -237,7 +262,7 @@
                                             <label class="col-md-3"></label>
                                             <div class="col-md-9">
                                                 <div class="form-group form-button">
-                                                    <input type="submit" class="btn btn-fill btn-rose" name="addcatg" value="<?php echo $this->lang->line("Add Product");?>">
+                                                    <input type="submit" class="btn btn-fill btn-rose" name="addcatg" value="<?php echo $this->lang->line("Update Product");?>">
                                                 </div>
                                             </div>
                                         </div>

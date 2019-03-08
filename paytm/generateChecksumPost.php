@@ -27,7 +27,7 @@ $paramList["WEBSITE"] = 'APP_STAGING'; // transaction amount
 $paramList["EMAIL"] = $email; // customer email id
 $paramList["MOBILE_NO"] = $mobile; // customer 10 digit mobile no.
 //$paramList["CALLBACK_URL"] = 'https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp'; //Provided by Paytm
-$paramList["CALLBACK_URL"] = 'http://neerajbisht.com/grocery_test/paytm/verifyCheckSum.php'; //Provided by Paytm
+$paramList["CALLBACK_URL"] = 'https://thecodecafe.in/gogrocer/paytm/verifyCheckSum.php'; //Provided by Paytm
  
 $checkSum = getChecksumFromArray($paramList,"&rdeq7C4d5t%nKH%");
 $paramList["CHECKSUMHASH"] = $checkSum;

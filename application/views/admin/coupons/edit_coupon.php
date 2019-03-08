@@ -20,13 +20,31 @@
     <!--     Fonts and icons     -->
     <link href="<?php echo base_url($this->config->item("new_theme")."/assets/css/font-awesome.css"); ?>" rel="stylesheet" />
     <link href="<?php echo base_url($this->config->item("new_theme")."/assets/css/google-roboto-300-700.css"); ?>" rel="stylesheet" />
-    <style type="text/css">
+        <style type="text/css">
         .ui-datepicker-trigger{
             height: 25px !important;
             width: 25px !important
         }
         #ui-datepicker-div{
             background-color: #fff;
+            padding:20px;
+        }
+        a.ui-datepicker-next.ui-corner-all {
+            float: right;
+        }
+        .ui-datepicker-title
+        {
+            text-align:center;
+        }
+        th {
+            text-align: center;
+            padding:4px;
+        }
+        .ui-datepicker-next::after {
+          content: " >>";
+        }
+        .ui-datepicker-prev::before {
+          content: " <<";
         }
     </style>
 </head>
@@ -147,7 +165,7 @@
                                             <label class="col-md-3"></label>
                                             <div class="col-md-9">
                                                 <div class="form-group form-button">
-                                                    <input type="submit"name="addcatg" value="<?php echo $this->lang->line("Edit Coupon");?>" class="btn btn-fill btn-rose" />
+                                                    <input type="submit"name="addcatg" value="<?php echo $this->lang->line("Update Coupon");?>" class="btn btn-fill btn-rose" />
                                                 </div>
                                             </div>
                                         </div>

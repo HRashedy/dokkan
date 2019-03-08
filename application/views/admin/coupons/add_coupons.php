@@ -27,6 +27,24 @@
         }
         #ui-datepicker-div{
             background-color: #fff;
+            padding:20px;
+        }
+        a.ui-datepicker-next.ui-corner-all {
+            float: right;
+        }
+        .ui-datepicker-title
+        {
+            text-align:center;
+        }
+        th {
+            text-align: center;
+            padding:4px;
+        }
+        .ui-datepicker-next::after {
+          content: " >>";
+        }
+        .ui-datepicker-prev::before {
+          content: " <<";
         }
     </style>
 </head>
@@ -147,7 +165,7 @@
                                             <label class="col-md-3"></label>
                                             <div class="col-md-9">
                                                 <div class="form-group form-button">
-                                                    <input type="submit" name="addcatg" value="<?php echo $this->lang->line("Add Coupon");?>" class="btn btn-fill btn-rose" />
+                                                    <input type="submit" name="addcatg" value="<?php echo $this->lang->line("ADD COUPON");?>" class="btn btn-fill btn-rose" />
                                                 </div>
                                             </div>
                                         </div>

@@ -45,6 +45,18 @@ class Csv_model extends CI_Model
                     'rewards' => $insert_csv['rewards']
                     );
                 $data['crane_features']=$this->db->insert('products', $data);
+                $in_id=$this->db->insert_id();
+                $date=date('Y-m-d h:i:s');
+                
+                $data1 = array(
+                    'purchase_id' => "" ,
+                    'product_id' => $in_id,
+                    'qty' => '1',
+                    'unit' => $insert_csv['unit'],
+                    'date' => $date,
+                    'store_id_login' => '1'
+                    );
+                $data['crane_features']=$this->db->insert('purchase', $data1);
             }
             fclose($fp) or die("can't close file");
             $data['success']="Product upload success";

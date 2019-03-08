@@ -20,9 +20,9 @@ class Admin extends MY_Controller {
     }
     public function index()
     {
-        if(_is_user_login($this)){
-            redirect(_get_user_redirect($this));
-        }else{
+        // if(_is_user_login($this)){
+        //     redirect(_get_user_redirect($this));
+        // }else{
             
             $data = array("error"=>"");       
             if(isset($_POST))
@@ -43,8 +43,8 @@ class Admin extends MY_Controller {
                 }else
                 {
                    
-$q = $this->db->query("Select * from `users` where (`user_email`='".$this->input->post("email")."')
- and user_password='".md5($this->input->post("password"))."' and user_login_status='1'");
+                $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input->post("email")."')
+                 and user_password='".md5($this->input->post("password"))."' and user_login_status='1'");
                     
                    // print_r($q) ; 
                     if ($q->num_rows() > 0)
@@ -80,10 +80,14 @@ $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input
                     
                 }
             }
+            else
+            {
+                $this->session->sess_destroy();
+            }
             $data["active"] = "login";
             
             $this->load->view("admin/login2",$data);
-        }
+        // }
     }
     public function dashboard(){
         if(_is_user_login($this)){
@@ -94,6 +98,9 @@ $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input
              $nexday = date('Y-m-d', strtotime(' +1 day'));
             $data["nextday_orders"] = $this->product_model->get_sale_orders(" and sale.on_date = '".$nexday."' ");
             $this->load->view("admin/dashboard",$data);
+        }
+        else{
+            redirect("admin");
         }
     }
     public function orders(){
@@ -115,6 +122,9 @@ $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input
             $data["today_orders"] = $this->product_model->get_sale_orders($filter);
             
             $this->load->view("admin/orders/orderslist2",$data);
+        }
+        else{
+            redirect("admin");
         }
     }
     public function confirm_order($order_id){
@@ -146,6 +156,9 @@ $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input
             }
             redirect("admin/orders");
         }
+        else{
+            redirect("admin");
+        }
     }
     
     public function delivered_order($order_id){
@@ -155,10 +168,10 @@ $q = $this->db->query("Select * from `users` where (`user_email`='".$this->input
             if(!empty($order)){
                 $this->db->query("update sale set status = 2 where sale_id = '".$order_id."'");
                 /* $this->db->query("INSERT INTO delivered_order (sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method)
-SELECT sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method FROM sale
-where sale_id = '".$order_id."'"); 
+                SELECT sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method FROM sale
+                where sale_id = '".$order_id."'"); 
 
-*/
+                */
                 
                 $q = $this->db->query("Select * from registers where user_id = '".$order->user_id."'");
                 $user = $q->row();
@@ -184,6 +197,9 @@ where sale_id = '".$order_id."'");
             }
             redirect("admin/orders");
         }
+        else{
+            redirect("admin");
+        }
     }
     
     public function delivered_order_complete($order_id){
@@ -193,8 +209,8 @@ where sale_id = '".$order_id."'");
             if(!empty($order)){
                 $this->db->query("update sale set status = 4 where sale_id = '".$order_id."'");
                 $this->db->query("INSERT INTO delivered_order (sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method)
-SELECT sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method FROM sale
-where sale_id = '".$order_id."'"); 
+                SELECT sale_id, user_id, on_date, delivery_time_from, delivery_time_to, status, note, is_paid, total_amount, total_rewards, total_kg, total_items, socity_id, delivery_address, location_id, delivery_charge, new_store_id, assign_to, payment_method FROM sale
+                where sale_id = '".$order_id."'"); 
 
                 
                 $q = $this->db->query("Select * from registers where user_id = '".$order->user_id."'");
@@ -230,13 +246,19 @@ where sale_id = '".$order_id."'");
             }
             redirect("admin/orders");
         }
+        else{
+            redirect("admin");
+        }
     }
+
     public function cancle_order($order_id){
         if(_is_user_login($this)){
             $this->load->model("product_model");
             $order = $this->product_model->get_sale_order_by_id($order_id);
+            
             if(!empty($order)){
                 $this->db->query("update sale set status = 3 where sale_id = '".$order_id."'");
+                $this->db->delete('sale_items', array('sale_id' => $order_id)); 
                 
                  $q = $this->db->query("Select * from users where user_id = '".$order->user_id."'");  
                  $user = $q->row();  
@@ -261,6 +283,9 @@ where sale_id = '".$order_id."'");
             }
             redirect("admin/orders");
         }
+        else{
+            redirect("admin");
+        }
     }
     
     public function delete_order($order_id){
@@ -275,7 +300,11 @@ where sale_id = '".$order_id."'");
             }
             redirect("admin/orders");
         }
+        else{
+            redirect("admin");
+        }
     }
+
     public function orderdetails($order_id){
         if(_is_user_login($this)){
             $data = array();
@@ -285,7 +314,11 @@ where sale_id = '".$order_id."'");
             //print_r( $data);exit();
             $this->load->view("admin/orders/orderdetails2",$data);
         }
+        else{
+            redirect("admin");
+        }
     }
+
     public function change_status(){
         $table = $this->input->post("table");
         $id = $this->input->post("id");
@@ -331,6 +364,7 @@ where sale_id = '".$order_id."'");
         $data["user_types"] = $this->users_model->get_user_type();
         $this->load->view("admin/user_types",$data);
     }
+
     function user_type_delete($type_id){
         $data = array();
             $this->load->model("users_model");
@@ -340,6 +374,7 @@ where sale_id = '".$order_id."'");
                 redirect("admin/user_types");
            }
     }
+
     public function user_access($user_type_id){
         if($_POST){
            //print_r($_POST);     
@@ -629,9 +664,15 @@ where sale_id = '".$order_id."'");
 /* ========== End Categories ========== */    
 /* ========== Products ==========*/
 function products(){
+    if(_is_user_login($this)){
         $this->load->model("product_model");
         $data["products"]  = $this->product_model->get_products();
-        $this->load->view("admin/product/list2",$data);    
+        $this->load->view("admin/product/list2",$data);
+    }
+    else
+    {
+        redirect('admin');
+    }
 }
  
  function header_products(){
@@ -862,11 +903,12 @@ function add_products(){
                    }
                     
                     $in_id = $this->common_model->data_insert("products",$array); 
-                    $this->db->query("Insert into purchase(product_id, qty, unit, date, store_id_login) values('".$in_id."', 1, 1, '".date('d-m-y h:i:s ')."', 67)");
+                    $purchaasr=$this->db->query("Insert into purchase(product_id, qty, unit, date, store_id_login) values('".$in_id."', 1, '".$this->input->post("unit")."', '".date('d-m-y h:i:s ')."', '"._get_current_user_id($this)."')");
+                    if($purchaasr){ $m=1; }else{ $m=0; }
                     $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
                                         <i class="fa fa-check"></i>
                                       <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Success!</strong> Your request added successfully...
+                                      <strong>Success!</strong> Your request added successfully..."'.$m.'"
                                     </div>');
                     redirect('admin/products');
                 }
@@ -957,6 +999,10 @@ function delete_product($id){
             $this->db->query("Delete from products where product_id = '".$id."'");
             redirect("admin/products");
         }
+        else
+        {
+            redirect('admin');
+        }
         
 }
 
@@ -1013,9 +1059,14 @@ public function add_purchase(){
                 $this->load->view("admin/product/purchase2",$data);  
                 
             }
-        }
+    }
+    else
+    {
+        redirect('admin');
+    }
     
 }
+
 function edit_purchase($id){
     if(_is_user_login($this)){
         
@@ -1060,61 +1111,74 @@ function edit_purchase($id){
                 $this->load->view("admin/product/edit_purchase2",$data);  
                 
             }
-        }
+    }
+    else
+    {
+        redirect('admin');
+    }
 }
+
 function delete_purchase($id){
-        if(_is_user_login($this)){
-            $this->db->query("Delete from purchase where purchase_id = '".$id."'");
-            redirect("admin/add_purchase");
-        }
+    if(_is_user_login($this)){
+        $this->db->query("Delete from purchase where purchase_id = '".$id."'");
+        redirect("admin/add_purchase");
+    }
+    else
+    {
+        redirect('admin');
+    }
 }
 /* ========== Purchase END ==========*/
     public function socity(){
-    if(_is_user_login($this)){
-        
-            if(isset($_POST))
-            {
-                $this->load->library('form_validation');
-                $this->form_validation->set_rules('pincode', 'pincode', 'trim|required');
-                $this->form_validation->set_rules('socity_name', 'Socity Name', 'trim|required');
-                 $this->form_validation->set_rules('delivery', 'Delivery Charges', 'trim|required');
-
-                if ($this->form_validation->run() == FALSE)
+        if(_is_user_login($this)){
+            
+                if(isset($_POST))
                 {
-                  if($this->form_validation->error_string()!="")
-                      $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-                }
-                else
-                {
-              
-                    $this->load->model("common_model");
-                    $array = array(
-                    "socity_name"=>$this->input->post("socity_name"),
-                    "pincode"=>$this->input->post("pincode"),
-                      "delivery_charge"=>$this->input->post("delivery")
+                    $this->load->library('form_validation');
+                    $this->form_validation->set_rules('pincode', 'pincode', 'trim|required');
+                    $this->form_validation->set_rules('socity_name', 'Socity Name', 'trim|required');
+                     $this->form_validation->set_rules('delivery', 'Delivery Charges', 'trim|required');
 
-                    );
-                    $this->common_model->data_insert("socity",$array);
+                    if ($this->form_validation->run() == FALSE)
+                    {
+                      if($this->form_validation->error_string()!="")
+                          $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+                    }
+                    else
+                    {
+                  
+                        $this->load->model("common_model");
+                        $array = array(
+                        "socity_name"=>$this->input->post("socity_name"),
+                        "pincode"=>$this->input->post("pincode"),
+                          "delivery_charge"=>$this->input->post("delivery")
+
+                        );
+                        $this->common_model->data_insert("socity",$array);
+                        
+                        $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
+                                            <i class="fa fa-check"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Success!</strong> Your request added successfully...
+                                        </div>');
+                        redirect("admin/socity");
+                    }
                     
-                    $this->session->set_flashdata("message",'<div class="alert alert-success alert-dismissible" role="alert">
-                                        <i class="fa fa-check"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Success!</strong> Your request added successfully...
-                                    </div>');
-                    redirect("admin/socity");
+                    $this->load->model("product_model");
+                    $data["socities"]  = $this->product_model->get_socities();
+                    $this->load->view("admin/socity/list2",$data);  
+                    
                 }
-                
-                $this->load->model("product_model");
-                $data["socities"]  = $this->product_model->get_socities();
-                $this->load->view("admin/socity/list2",$data);  
-                
-            }
         }
-        
+        else
+        {
+            redirect('admin');
+        }
+            
     }
 
     public function city(){
@@ -1158,58 +1222,66 @@ function delete_purchase($id){
             $data["cities"] = $ct->result();
             $this->load->view("admin/socity/city_list",$data);  
         }
+        else{
+            redirect("admin");
+        }
         
     }
 
-     function delete_city($id){
+    public function delete_city($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from city where city_id = '".$id."'");
             redirect("admin/city");
         }
+        else
+        {
+            redirect('admin');
+        }
     }
     
     public function declared_rewards(){
-    if(_is_user_login($this)){
-        
-            $this->load->library('form_validation');
-           $this->load->model("product_model");
-           
-               
-                
-                 $this->form_validation->set_rules('delivery', 'Delivery Charges', 'trim|required');
-
-                if (!$this->form_validation->run() == FALSE)
-                {
-                    
-                    $point = array(
-                       'point' => $this->input->post('delivery')
-                      
-                    );
-                    
-                    $this->product_model->update_reward($point);
-                    
-                    
-                  if($this->form_validation->error_string()!="")
-                      $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-                
-                
-               }
-                
-                $data['rewards']  = $this->product_model->rewards_value();
-                //print_r( $data['rewards']);
-                $this->load->view("admin/declared_rewards/edit2",$data);  
-                
+        if(_is_user_login($this)){
             
+                $this->load->library('form_validation');
+               $this->load->model("product_model");
+               
+                   
+                    
+                     $this->form_validation->set_rules('delivery', 'Delivery Charges', 'trim|required');
+
+                    if (!$this->form_validation->run() == FALSE)
+                    {
+                        
+                        $point = array(
+                           'point' => $this->input->post('delivery')
+                          
+                        );
+                        
+                        $this->product_model->update_reward($point);
+                        
+                        
+                      if($this->form_validation->error_string()!="")
+                          $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+                    
+                    
+                   }
+                    
+                    $data['rewards']  = $this->product_model->rewards_value();
+                    //print_r( $data['rewards']);
+                    $this->load->view("admin/declared_rewards/edit2",$data);  
         }
-        
+        else
+        {
+            redirect('admin');
+        }
     }
     
     public function edit_socity($id){
-    if(_is_user_login($this)){
+        if(_is_user_login($this)){
         
             if(isset($_POST))
             {
@@ -1253,19 +1325,32 @@ function delete_purchase($id){
                 
             }
         }
+        else
+        {
+            redirect('admin');
+        }
         
     }
-    function delete_socity($id){
+    public function delete_socity($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from socity where socity_id = '".$id."'");
             redirect("admin/socity");
         }
+        else
+        {
+            redirect('admin');
+        }
     }
+
     function registers(){
         if(_is_user_login($this)){
             $this->load->model("product_model");
             $users = $this->product_model->get_all_users();
             $this->load->view("admin/allusers2",array("users"=>$users));
+        }
+        else
+        {
+            redirect('admin');
         }
     }
  
@@ -1386,17 +1471,20 @@ public function addpage_app()
 
 /* ========== End page page setting ========*/
 
- public function setting(){
+public function setting(){
     if(_is_user_login($this)){
           $this->load->model("setting_model"); 
                 $data["settings"]  = $this->setting_model->get_settings(); 
               
                 $this->load->view("admin/setting/settings2",$data);  
-                
-            
-        }
     }
- public function edit_settings($id){
+    else
+    {
+        redirect('admin');
+    }
+}
+
+public function edit_settings($id){
     if(_is_user_login($this)){
         
             if(isset($_POST))
@@ -1437,23 +1525,31 @@ public function addpage_app()
                 $this->load->view("admin/setting/edit_settings2",$data);  
                 
             }
-        }
-        
     }
+    else
+        {
+            redirect('admin');
+        }
+}
     
-    function stock(){
-        if(_is_user_login($this)){
-            $this->load->model("product_model");
-            $data["stock_list"] = $this->product_model->get_leftstock();
-            $this->load->view("admin/product/stock2",$data);
-        }
+public function stock(){
+    if(_is_user_login($this)){
+        $this->load->model("product_model");
+        $data["stock_list"] = $this->product_model->get_leftstock();
+        $this->load->view("admin/product/stock2",$data);
     }
+    else
+        {
+            redirect('admin');
+        }
+}
 /* ========== End page page setting ========*/
    function testnoti(){
         $token =  "dLmBHiGL_6g:APA91bGp5L_mZ0NwPZiihxIDVmo-d-UV05fvmcIDzDiyJ82ztCelmFl4oFRD2hEOPT2lE--ze-yH6Nac6KxbHspYWSQw4mmw8AZ-3HRrwD_crCO1o3p9mRu9WvOOsaw_vvScMnIIv2np";
     }
-     function notification(){
-         if(_is_user_login($this)){
+
+    function notification(){
+        if(_is_user_login($this)){
         
             if(isset($_POST))
             {
@@ -1480,8 +1576,8 @@ public function addpage_app()
                             $gcm = new GCM();   
                             //$result = $gcm->send_topics("/topics/rabbitapp",$message ,"ios"); 
                             
-                            //$result = $gcm->send_topics("Dokkan_Grocery",$message ,"android");
-                            //$result = $gcm->send_notification("Dokkan_Grocery", $message,"android");
+                            //$result = $gcm->send_topics("Dokkan",$message ,"android");
+                            //$result = $gcm->send_notification("Dokkan", $message,"android");
                             
                                                                         $q = $this->db->query("Select user_ios_token from registers");
                                                                         $registers = $q->result();
@@ -1510,6 +1606,10 @@ public function addpage_app()
                    $this->load->view("admin/product/notification2");
                 
             }
+        }
+        else
+        {
+            redirect('admin');
         }
         
     }
@@ -1543,45 +1643,59 @@ public function addpage_app()
             $timeslot = $this->time_model->get_time_slot();
             $this->load->view("admin/timeslot/edit2",array("schedule"=>$timeslot));
         }
+        else
+        {
+            redirect('admin');
+        }
     }
+
     function closing_hours(){
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('date', 'Date', 'trim|required');
-                $this->form_validation->set_rules('opening_time', 'Start Hour', 'trim|required');
-                $this->form_validation->set_rules('closing_time', 'End Hour', 'trim|required');
-                if ($this->form_validation->run() == FALSE)
-                {
-                  if($this->form_validation->error_string()!="")
-                      $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
-                                        <i class="fa fa-warning"></i>
-                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                    </div>');
-                }
-                else
-                {
-                      $array = array("date"=>date("Y-m-d",strtotime($this->input->post("date"))),
-                      "from_time"=>date("H:i:s",strtotime($this->input->post("opening_time"))),
-                      "to_time"=>date("H:i:s",strtotime($this->input->post("closing_time")))
-                      ); 
-                      $this->db->insert("closing_hours",$array); 
-                }
-        
-         $this->load->model("time_model");
-         $timeslot = $this->time_model->get_closing_date(date("Y-m-d"));
-         $this->load->view("admin/timeslot/closing_hours2",array("schedule"=>$timeslot));
-         
-                        
+        if(_is_user_login($this)){
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('date', 'Date', 'trim|required');
+                    $this->form_validation->set_rules('opening_time', 'Start Hour', 'trim|required');
+                    $this->form_validation->set_rules('closing_time', 'End Hour', 'trim|required');
+                    if ($this->form_validation->run() == FALSE)
+                    {
+                      if($this->form_validation->error_string()!="")
+                          $this->session->set_flashdata("message", '<div class="alert alert-warning alert-dismissible" role="alert">
+                                            <i class="fa fa-warning"></i>
+                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                        </div>');
+                    }
+                    else
+                    {
+                          $array = array("date"=>date("Y-m-d",strtotime($this->input->post("date"))),
+                          "from_time"=>date("H:i:s",strtotime($this->input->post("opening_time"))),
+                          "to_time"=>date("H:i:s",strtotime($this->input->post("closing_time")))
+                          ); 
+                          $this->db->insert("closing_hours",$array); 
+                    }
+            
+             $this->load->model("time_model");
+             $timeslot = $this->time_model->get_closing_date(date("Y-m-d"));
+             $this->load->view("admin/timeslot/closing_hours2",array("schedule"=>$timeslot));
+        }
+        else
+        {
+            redirect('admin');
+        }
+            
     }
     
      
-     function delete_closing_date($id){
+    function delete_closing_date($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from closing_hours where id = '".$id."'");
             redirect("admin/closing_hours");
         }
-    
+        else
+        {
+            redirect('admin');
+        }
     }
+
     public function addslider()
     {
        if(_is_user_login($this)){
@@ -1646,13 +1760,13 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect('admin');
         }
     }
  
-     public function listslider()
+    public function listslider()
     {
-       if(_is_user_login($this)){
+        if(_is_user_login($this)){
            $data["error"] = "";
            $data["active"] = "listslider";
            $this->load->model("slider_model");
@@ -1661,7 +1775,7 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect('admin');
         }
     }
     
@@ -1730,7 +1844,7 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect('admin');
         }
     }
     
@@ -1745,10 +1859,11 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect('admin');
         }
     }
-     public function edit_banner($id)
+
+    public function edit_banner($id)
     {
        if(_is_user_login($this))
        {
@@ -1788,190 +1903,205 @@ public function addpage_app()
         }
         else
         {
-            redirect('login');
+            redirect('admin');
         }
     }
     
     public function editslider($id)
     {
        if(_is_user_login($this))
-           {
-                
-                $this->load->model("slider_model");
-               $data["slider"] = $this->slider_model->get_slider_by_id($id);
-               
-                $data["error"] = "";
-                $data["active"] = "listslider";
-                if(isset($_REQUEST["saveslider"]))
-                {
-                    $this->load->library('form_validation');
-                    $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
-                   
-                      if ($this->form_validation->run() == FALSE)
-                    {
-                      if($this->form_validation->error_string()!="")
-                          $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
-                                            <i class="fa fa-warning"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                        </div>';
-                    }
-                    else
-                    {
-                        $this->load->model("slider_model");
-                        $this->slider_model->edit_slider($id); 
-                        $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
-                                            <i class="fa fa-check"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Success!</strong> Your Slider saved successfully...
-                                        </div>');
-                        redirect('admin/listslider');
-                    }
-                }
-               $this->load->view('admin/slider/editslider2',$data);
-            }
-            else
+       {
+            
+            $this->load->model("slider_model");
+           $data["slider"] = $this->slider_model->get_slider_by_id($id);
+           
+            $data["error"] = "";
+            $data["active"] = "listslider";
+            if(isset($_REQUEST["saveslider"]))
             {
-                redirect('login');
+                $this->load->library('form_validation');
+                $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
+               
+                  if ($this->form_validation->run() == FALSE)
+                {
+                  if($this->form_validation->error_string()!="")
+                      $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                                        <i class="fa fa-warning"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                    </div>';
+                }
+                else
+                {
+                    $this->load->model("slider_model");
+                    $this->slider_model->edit_slider($id); 
+                    $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
+                                        <i class="fa fa-check"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Success!</strong> Your Slider saved successfully...
+                                    </div>');
+                    redirect('admin/listslider');
+                }
             }
+           $this->load->view('admin/slider/editslider2',$data);
+        }
+        else
+        {
+            redirect('admin');
+        }
     }
     
-     function deleteslider($id){
-        $data = array();
+    public function deleteslider($id){
+
+        if(_is_user_login($this))
+        {
+            $data = array();
             $this->load->model("slider_model");
             $slider  = $this->slider_model->get_slider_by_id($id);
-           if($slider){
+            if($slider){
                 $this->db->query("Delete from slider where id = '".$slider->id."'");
                 unlink("uploads/sliders/".$slider->slider_image);
                 redirect("admin/listslider");
            }
-    }
-    
-    function delete_banner($id){
-        $data = array();
-            
-           
-                $this->db->query("Delete from banner where id = '".$id."'");
-                unlink("uploads/sliders/".$slider->slider_image);
-                redirect("admin/banner");
-    }
-    
-    function coupons(){
-
-        $this->load->helper('form');
-        $this->load->model('product_model');
-        $this->load->library('session');
-       
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
-        $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
-        
-        $this->form_validation->set_rules('value', 'Value', 'required|numeric');
-        $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
-        $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
-
-        $data= array();
-        $data['coupons'] = $this->product_model->coupon_list();
-        if($this->form_validation->run() == FALSE)
-        {
-            $this->form_validation->set_error_delimiters('<div class="text-danger">not wor', '</div>');
-            
-            $this->load->view("admin/coupons/coupon_list2",$data); 
-             
-        }else{
-            $data = array(
-            'coupon_name'=>$this->input->post('coupon_title'),
-            'coupon_code'=> $this->input->post('coupon_code'),
-            'valid_from'=> $this->input->post('from'),
-            'valid_to'=> $this->input->post('to'),
-            'validity_type'=> $this->input->post('product_type'),
-            'product_name'=> $this->input->post('printable_name'),
-            'discount_type'=> $this->input->post('discount_type'),
-            'discount_value'=> $this->input->post('value'),
-            'cart_value'=> $this->input->post('cart_value'),
-            'uses_restriction'=> $this->input->post('restriction')
-             );
-             //print_r($data);
-             if($this->product_model->coupon($data))
-             {
-                 $this->session->set_flashdata('addmessage','Coupon added Successfully.');
-                $data['coupons'] = $this->product_model->coupon_list();
-                $this->load->view("admin/coupons/coupon_list2",$data);
-             }
         }
-       //$data['coupons'] = $this->product_model->coupon_list();
-       
-        //
+        else
+        {
+            redirect('admin');
+        }
+    }
+    
+    public function delete_banner($id){
+        if(_is_user_login($this))
+        {
+            $data = array();
+            $this->db->query("Delete from banner where id = '".$id."'");
+            unlink("uploads/sliders/".$slider->slider_image);
+            redirect("admin/banner");
+        }
+        else
+        {
+            redirect('admin');
+        }   
+           
+    }
+    
+    public function coupons(){
+        if(_is_user_login($this)){
+            $this->load->helper('form');
+            $this->load->model('product_model');
+            $this->load->library('session');
+           
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
+            $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
+            
+            $this->form_validation->set_rules('value', 'Value', 'required|numeric');
+            $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
+            $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
+
+            $data= array();
+            $data['coupons'] = $this->product_model->coupon_list();
+            if($this->form_validation->run() == FALSE)
+            {
+                $this->form_validation->set_error_delimiters('<div class="text-danger">not wor', '</div>');
+                
+                $this->load->view("admin/coupons/coupon_list2",$data); 
+                 
+            }
+            else{
+                $data = array(
+                'coupon_name'=>$this->input->post('coupon_title'),
+                'coupon_code'=> $this->input->post('coupon_code'),
+                'valid_from'=> $this->input->post('from'),
+                'valid_to'=> $this->input->post('to'),
+                'validity_type'=> $this->input->post('product_type'),
+                'product_name'=> $this->input->post('printable_name'),
+                'discount_type'=> $this->input->post('discount_type'),
+                'discount_value'=> $this->input->post('value'),
+                'cart_value'=> $this->input->post('cart_value'),
+                'uses_restriction'=> $this->input->post('restriction')
+                 );
+                 //print_r($data);
+                 if($this->product_model->coupon($data))
+                 {
+                     $this->session->set_flashdata('addmessage','Coupon added Successfully.');
+                    $data['coupons'] = $this->product_model->coupon_list();
+                    $this->load->view("admin/coupons/coupon_list2",$data);
+                 }
+            }
+        }
+        else
+        {
+            redirect('admin');
+        }
         
     }  
 
-        function add_coupons(){
-
-        $this->load->helper('form');
-        $this->load->model('product_model');
-        $this->load->library('session');
-       
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
-        $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
-        
-        $this->form_validation->set_rules('value', 'Value', 'required|numeric');
-        $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
-        $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
-
-        $data= array();
-        $data['coupons'] = $this->product_model->coupon_list();
-        if($this->form_validation->run() == FALSE)
+    public function add_coupons(){
+        if(_is_user_login($this))
         {
-            $this->form_validation->set_error_delimiters('<div class="text-danger">not wor', '</div>');
+            $this->load->helper('form');
+            $this->load->model('product_model');
+            $this->load->library('session');
+           
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
+            $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
             
-            $this->load->view("admin/coupons/add_coupons",$data); 
-             
-        }else{
-            $data = array(
-            'coupon_name'=>$this->input->post('coupon_title'),
-            'coupon_code'=> $this->input->post('coupon_code'),
-            'valid_from'=> $this->input->post('from'),
-            'valid_to'=> $this->input->post('to'),
-            'validity_type'=> "",
-            'product_name'=> "",
-            'discount_type'=> "",
-            'discount_value'=> $this->input->post('value'),
-            'cart_value'=> $this->input->post('cart_value'),
-            'uses_restriction'=> $this->input->post('restriction')
-             );
-             //print_r($data);
-             if($this->product_model->coupon($data))
-             {
-                 $this->session->set_flashdata('addmessage','Coupon added Successfully.');
-                $data['coupons'] = $this->product_model->coupon_list();
-                $this->load->view("admin/coupons/add_coupons",$data);
-             }
+            $this->form_validation->set_rules('value', 'Value', 'required|numeric');
+            $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
+            $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
+
+            $data= array();
+            $data['coupons'] = $this->product_model->coupon_list();
+            if($this->form_validation->run() == FALSE)
+            {
+                $this->form_validation->set_error_delimiters('<div class="text-danger">not wor', '</div>');
+                
+                $this->load->view("admin/coupons/add_coupons",$data); 
+                 
+            }else{
+                $data = array(
+                'coupon_name'=>$this->input->post('coupon_title'),
+                'coupon_code'=> $this->input->post('coupon_code'),
+                'valid_from'=> $this->input->post('from'),
+                'valid_to'=> $this->input->post('to'),
+                'validity_type'=> "",
+                'product_name'=> "",
+                'discount_type'=> "",
+                'discount_value'=> $this->input->post('value'),
+                'cart_value'=> $this->input->post('cart_value'),
+                'uses_restriction'=> $this->input->post('restriction')
+                 );
+                 //print_r($data);
+                 if($this->product_model->coupon($data))
+                 {
+                     $this->session->set_flashdata('addmessage','Coupon added Successfully.');
+                    $data['coupons'] = $this->product_model->coupon_list();
+                    $this->load->view("admin/coupons/add_coupons",$data);
+                 }
+            }
         }
-       //$data['coupons'] = $this->product_model->coupon_list();
-       
-        //
-        
     } 
 
     public function date_valid($date)
     {
-     $parts = explode("/", $date);
-      if (count($parts) == 3) {      
-       if (checkdate($parts[1], $parts[0], $parts[2]))
-       {
-        return TRUE;
-       }
-    }
-     $this->form_validation->set_message('date_valid', 'The Date field must be dd/mm/yyyy');
-      return false;
+        $parts = explode("/", $date);
+        if (count($parts) == 3) {      
+            if (checkdate($parts[1], $parts[0], $parts[2]))
+            {
+                return TRUE;
+            }
+        }
+        $this->form_validation->set_message('date_valid', 'The Date field must be dd/mm/yyyy');
+        return false;
     }
 
-    public function lookup(){  
+    function lookup(){  
         $this->load->model("product_model");  
         $this->load->helper("url");  
         $this->load->helper('form');
@@ -2095,62 +2225,72 @@ public function addpage_app()
         }  
     }
 
-
     function editCoupon($id){
-        //echo $id;die();
-        $this->load->helper('form');
-       $this->load->library('form_validation');
-       
-       $this->load->model('product_model');
+        if(_is_user_login($this)){
+            //echo $id;die();
+            $this->load->helper('form');
+            $this->load->library('form_validation');
+           
+            $this->load->model('product_model');
 
-       $this->load->model('product_model');
-        $this->load->library('form_validation');
-        $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
-        $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
-        $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
+            $this->load->model('product_model');
+            $this->load->library('form_validation');
+            $this->form_validation->set_rules('coupon_title', 'Coupon name', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('coupon_code', 'Coupon Code', 'trim|required|max_length[6]|alpha_numeric');
+            $this->form_validation->set_rules('from', 'From', 'required|callback_date_valid');
+            $this->form_validation->set_rules('to', 'To', 'required|callback_date_valid');
 
-        $this->form_validation->set_rules('value', 'Value', 'required|numeric');
-        $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
-        $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
+            $this->form_validation->set_rules('value', 'Value', 'required|numeric');
+            $this->form_validation->set_rules('cart_value', 'Cart Value', 'required|numeric');
+            $this->form_validation->set_rules('restriction', 'Uses restriction', 'required|numeric');
 
-        $data= array();
-        if($this->form_validation->run() == FALSE)
-        {
-            $this->form_validation->set_error_delimiters('<div class="text-danger">', '</div>');
-            $data['coupon'] = $this->product_model->getCoupon($id);
-            $this->load->view("admin/coupons/edit_coupon",$data); 
-             
-        }else{
-            $data = array(
-            'coupon_name'=>$this->input->post('coupon_title'),
-            'coupon_code'=> $this->input->post('coupon_code'),
-            'valid_from'=> $this->input->post('from'),
-            'valid_to'=> $this->input->post('to'),
-            'validity_type'=> "",
-            'product_name'=> "",
-            'discount_type'=> "",
-            'discount_value'=> $this->input->post('value'),
-            'cart_value'=> $this->input->post('cart_value'),
-            'uses_restriction'=> $this->input->post('restriction')
-             );
-             print_r($data);
-             if($this->product_model->editCoupon($id,$data)){
-                $this->session->set_flashdata('addmessage','Coupon edited Successfully.');
-                redirect("admin/coupons");
-             }
+            $data= array();
+            if($this->form_validation->run() == FALSE)
+            {
+                $this->form_validation->set_error_delimiters('<div class="text-danger">', '</div>');
+                $data['coupon'] = $this->product_model->getCoupon($id);
+                $this->load->view("admin/coupons/edit_coupon",$data); 
+                 
+            }
+            else{
+                $data = array(
+                'coupon_name'=>$this->input->post('coupon_title'),
+                'coupon_code'=> $this->input->post('coupon_code'),
+                'valid_from'=> $this->input->post('from'),
+                'valid_to'=> $this->input->post('to'),
+                'validity_type'=> "",
+                'product_name'=> "",
+                'discount_type'=> "",
+                'discount_value'=> $this->input->post('value'),
+                'cart_value'=> $this->input->post('cart_value'),
+                'uses_restriction'=> $this->input->post('restriction')
+                 );
+                 print_r($data);
+                 if($this->product_model->editCoupon($id,$data)){
+                    $this->session->set_flashdata('addmessage','Coupon edited Successfully.');
+                    redirect("admin/coupons");
+                }
+            }
         }
-       
-        
+        else
+        {
+            redirect('admin');
+        }
     }
 
     function deleteCoupon($id)
     {
-        $this->load->model('product_model');
-        if($this->product_model->deleteCoupon($id))
+        if(_is_user_login($this)){
+            $this->load->model('product_model');
+            if($this->product_model->deleteCoupon($id))
+            {
+                $this->session->set_flashdata('addmessage','One Coupon deleted Successfully.');
+                redirect("admin/coupons");
+            }
+        }
+        else
         {
-            $this->session->set_flashdata('addmessage','One Coupon deleted Successfully.');
-            redirect("admin/coupons");
+            redirect('admin');
         }
     }
 
@@ -2166,7 +2306,7 @@ public function addpage_app()
     function add_dealproduct(){
         $this->load->helper('form');
 
-       if(_is_user_login($this)){
+        if(_is_user_login($this)){
        
           
 
@@ -2277,193 +2417,200 @@ public function addpage_app()
         {
             redirect('admin');
         }
-    
-}
+    }
 
-function delete_deal_product($id){
+    function delete_deal_product($id){
         if(_is_user_login($this)){
             $this->db->query("Delete from deal_product where id = '".$id."'");
             redirect("admin/dealofday");
         }
-}
+        else
+        {
+            redirect('admin');
+        }
+    }
 
     public function feature_banner()
-        {
-           if(_is_user_login($this)){
-               $data["error"] = "";
-               $data["active"] = "listslider";
-               $this->load->model("slider_model");
-               $data["allslider"] = $this->slider_model->feature_banner();
-               $this->load->view('admin/feature_banner/listslider2',$data);
-            }
-            else
-            {
-                redirect('login');
-            }
+    {
+       if(_is_user_login($this)){
+           $data["error"] = "";
+           $data["active"] = "listslider";
+           $this->load->model("slider_model");
+           $data["allslider"] = $this->slider_model->feature_banner();
+           $this->load->view('admin/feature_banner/listslider2',$data);
         }
+        else
+        {
+            redirect('admin');
+        }
+    }
 
     public function add_feature_Banner()
-        {
-           if(_is_user_login($this)){
-               
-                $data["error"] = "";
-                $data["active"] = "addslider";
-                
-                if(isset($_REQUEST["addslider"]))
-                {
-                    $this->load->library('form_validation');
-                    $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
-                    if (empty($_FILES['slider_img']['name']))
-                    {
-                        $this->form_validation->set_rules('slider_img', 'Slider Image', 'required');
-                    }
-                    
-                    if ($this->form_validation->run() == FALSE)
-                    {
-                          $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
-                                            <i class="fa fa-warning"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                        </div>';
-                    }
-                    else
-                    {
-                        $add = array(
-                                        "slider_title"=>$this->input->post("slider_title"),
-                                        "slider_status"=>$this->input->post("slider_status"),
-                                        "slider_url"=>$this->input->post("slider_url"),
-                                        "sub_cat"=>$this->input->post("sub_cat")
-                                        );
-                        
-                            if($_FILES["slider_img"]["size"] > 0){
-                                $config['upload_path']          = './uploads/sliders/';
-                                $config['allowed_types']        = 'gif|jpg|png|jpeg';
-                                $this->load->library('upload', $config);
-                
-                                if ( ! $this->upload->do_upload('slider_img'))
-                                {
-                                        $error = array('error' => $this->upload->display_errors());
-                                }
-                                else
-                                {
-                                    $img_data = $this->upload->data();
-                                    $add["slider_image"]=$img_data['file_name'];
-                                }
-                                
-                           }
-                           
-                           $this->db->insert("feature_slider",$add);
-                        
-                        $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
-                                            <i class="fa fa-check"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Success!</strong> Your Slider added successfully...
-                                        </div>');
-                        redirect('admin/feature_banner');
-                    }
-                }
-            $this->load->view('admin/feature_banner/addslider2',$data);
-            }
-            else
-            {
-                redirect('login');
-            }
-        }
-        
-     public function edit_feature_banner($id)
-        {
-           if(_is_user_login($this))
-           {
-                
-                $this->load->model("slider_model");
-               $data["slider"] = $this->slider_model->get_feature_banner($id);
-               
-                $data["error"] = "";
-                $data["active"] = "listslider";
-                if(isset($_REQUEST["saveslider"]))
-                {
-                    $this->load->library('form_validation');
-                    $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
-                   
-                      if ($this->form_validation->run() == FALSE)
-                    {
-                      if($this->form_validation->error_string()!="")
-                          $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
-                                            <i class="fa fa-warning"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                        </div>';
-                    }
-                    else
-                    {
-                        $this->load->model("slider_model");
-                        $this->slider_model->edit_feature_banner($id); 
-                        $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
-                                            <i class="fa fa-check"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Success!</strong> Your Slider saved successfully...
-                                        </div>');
-                        redirect('admin/feature_banner');
-                    }
-                }
-               $this->load->view('admin/feature_banner/editslider2',$data);
-            }
-            else
-            {
-                redirect('login');
-            }
-        }
-
-        function delete_feature_banner($id){
-            $data = array();
-            
+    {
+       if(_is_user_login($this)){
            
-                $this->db->query("Delete from feature_slider where id = '".$id."'");
-                unlink("uploads/sliders/".$slider->slider_image);
-                redirect("admin/feature_banner");
-        }
-        
-        public function help()
-        {
-           if(_is_user_login($this)){
-               
-                $data["error"] = "";
-                $data["active"] = "addcat";
-                if(isset($_REQUEST["addcatg"]))
+            $data["error"] = "";
+            $data["active"] = "addslider";
+            
+            if(isset($_REQUEST["addslider"]))
+            {
+                $this->load->library('form_validation');
+                $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
+                if (empty($_FILES['slider_img']['name']))
                 {
-                    $this->load->library('form_validation');
-                    $this->form_validation->set_rules('mobile', 'Categories Title', 'trim|required');
-                    $this->form_validation->set_rules('email', 'Categories Parent', 'trim|required');
+                    $this->form_validation->set_rules('slider_img', 'Slider Image', 'required');
+                }
+                
+                if ($this->form_validation->run() == FALSE)
+                {
+                      $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                                        <i class="fa fa-warning"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                    </div>';
+                }
+                else
+                {
+                    $add = array(
+                                    "slider_title"=>$this->input->post("slider_title"),
+                                    "slider_status"=>$this->input->post("slider_status"),
+                                    "slider_url"=>$this->input->post("slider_url"),
+                                    "sub_cat"=>$this->input->post("sub_cat")
+                                    );
                     
-                    if ($this->form_validation->run() == FALSE)
-                    {
-                       if($this->form_validation->error_string()!=""){
-                          $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
-                                            <i class="fa fa-warning"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                        </div>';
-                        }
-                    }
-                    else
-                    {
-                        $this->load->model("category_model");
-                        $this->category_model->add_category(); 
-                        $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
-                                            <i class="fa fa-check"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Success!</strong> Your request Send successfully...
-                                        </div>');
-                        redirect('admin/addcategories');
+                        if($_FILES["slider_img"]["size"] > 0){
+                            $config['upload_path']          = './uploads/sliders/';
+                            $config['allowed_types']        = 'gif|jpg|png|jpeg';
+                            $this->load->library('upload', $config);
+            
+                            if ( ! $this->upload->do_upload('slider_img'))
+                            {
+                                    $error = array('error' => $this->upload->display_errors());
+                            }
+                            else
+                            {
+                                $img_data = $this->upload->data();
+                                $add["slider_image"]=$img_data['file_name'];
+                            }
+                            
+                       }
+                       
+                       $this->db->insert("feature_slider",$add);
+                    
+                    $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
+                                        <i class="fa fa-check"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Success!</strong> Your Slider added successfully...
+                                    </div>');
+                    redirect('admin/feature_banner');
+                }
+            }
+        $this->load->view('admin/feature_banner/addslider2',$data);
+        }
+        else
+        {
+            redirect('admin');
+        }
+    }
+        
+    public function edit_feature_banner($id)
+    {
+       if(_is_user_login($this))
+       {
+            
+            $this->load->model("slider_model");
+           $data["slider"] = $this->slider_model->get_feature_banner($id);
+           
+            $data["error"] = "";
+            $data["active"] = "listslider";
+            if(isset($_REQUEST["saveslider"]))
+            {
+                $this->load->library('form_validation');
+                $this->form_validation->set_rules('slider_title', 'Slider Title', 'trim|required');
+               
+                  if ($this->form_validation->run() == FALSE)
+                {
+                  if($this->form_validation->error_string()!="")
+                      $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                                        <i class="fa fa-warning"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                    </div>';
+                }
+                else
+                {
+                    $this->load->model("slider_model");
+                    $this->slider_model->edit_feature_banner($id); 
+                    $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
+                                        <i class="fa fa-check"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Success!</strong> Your Slider saved successfully...
+                                    </div>');
+                    redirect('admin/feature_banner');
+                }
+            }
+           $this->load->view('admin/feature_banner/editslider2',$data);
+        }
+        else
+        {
+            redirect('admin');
+        }
+    }
+
+    public function delete_feature_banner($id){
+        if(_is_user_login($this)){
+            $data = array();
+            $this->db->query("Delete from feature_slider where id = '".$id."'");
+            unlink("uploads/sliders/".$slider->slider_image);
+            redirect("admin/feature_banner");
+        }
+        else
+        {
+            redirect('admin');
+        }   
+    }
+        
+    public function help()
+    {
+        if(_is_user_login($this)){
+           
+            $data["error"] = "";
+            $data["active"] = "addcat";
+            if(isset($_REQUEST["addcatg"]))
+            {
+                $this->load->library('form_validation');
+                $this->form_validation->set_rules('mobile', 'Categories Title', 'trim|required');
+                $this->form_validation->set_rules('email', 'Categories Parent', 'trim|required');
+                
+                if ($this->form_validation->run() == FALSE)
+                {
+                   if($this->form_validation->error_string()!=""){
+                      $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                                        <i class="fa fa-warning"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                    </div>';
                     }
                 }
+                else
+                {
+                    $this->load->model("category_model");
+                    $this->category_model->add_category(); 
+                    $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
+                                        <i class="fa fa-check"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Success!</strong> Your request Send successfully...
+                                    </div>');
+                    redirect('admin/addcategories');
+                }
+            }
             $this->load->view('admin/help/form');
-            }
-            else
-            {
-                redirect('admin');
-            }
         }
+        else
+        {
+            redirect('admin');
+        }
+    }
         
     public function move(){
         $header = array(
@@ -2508,8 +2655,6 @@ function delete_deal_product($id){
                echo "<br>TITLE =>".$variantName = $stock->variantName;
            }
         }
-        
-         
     }
     
     public function payment(){
@@ -2518,62 +2663,62 @@ function delete_deal_product($id){
         $data["razor"]=$this->db->query("SELECT status FROM `razorpay` where id = 1");
         $this->load->view("admin/payment/list",$data);
         }
-         else
-            {
-                redirect('admin');
-            }
-         
+        else
+        {
+            redirect('admin');
+        }
     }
+
     public function paypal_detail(){
         
         if(_is_user_login($this)){
                
-                $data["error"] = "";
-                $data["active"] = "pp";
-                if(isset($_POST["pp"]))
+            $data["error"] = "";
+            $data["active"] = "pp";
+            if(isset($_POST["pp"]))
+            {
+                $this->load->library('form_validation');
+                $this->form_validation->set_rules('client_id', 'Client ID', 'trim|required');
+                
+                if ($this->form_validation->run() == FALSE)
                 {
-                    $this->load->library('form_validation');
-                    $this->form_validation->set_rules('client_id', 'Client ID', 'trim|required');
-                    
-                    if ($this->form_validation->run() == FALSE)
-                    {
-                       if($this->form_validation->error_string()!=""){
-                          $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
-                                            <i class="fa fa-warning"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Warning!</strong> '.$this->form_validation->error_string().'
-                                        </div>';
-                        }
-                    }
-                    else
-                    {
-                        $client_id = $this->input->post("client_id");
-                        //$emp_fullname = $this->input->post("emp_fullname");
-                        $status = ($this->input->post("status")=="on")? 1 : 0;
-                        $array = array(
-                            'client_id'=>$client_id,
-                            'status'=>$status
-                            );
-                        
-                        $this->load->model("common_model");
-                        $this->common_model->data_update("paypal",$array,array("id"=>1)); 
-                        $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
-                                            <i class="fa fa-check"></i>
-                                          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                          <strong>Success!</strong> Your request Send successfully...
-                                        </div>');
-                        redirect('admin/payment');
+                   if($this->form_validation->error_string()!=""){
+                      $data["error"] = '<div class="alert alert-warning alert-dismissible" role="alert">
+                                        <i class="fa fa-warning"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Warning!</strong> '.$this->form_validation->error_string().'
+                                    </div>';
                     }
                 }
+                else
+                {
+                    $client_id = $this->input->post("client_id");
+                    //$emp_fullname = $this->input->post("emp_fullname");
+                    $status = ($this->input->post("status")=="on")? 1 : 0;
+                    $array = array(
+                        'client_id'=>$client_id,
+                        'status'=>$status
+                        );
+                    
+                    $this->load->model("common_model");
+                    $this->common_model->data_update("paypal",$array,array("id"=>1)); 
+                    $this->session->set_flashdata("success_req",'<div class="alert alert-success alert-dismissible" role="alert">
+                                        <i class="fa fa-check"></i>
+                                      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                      <strong>Success!</strong> Your request Send successfully...
+                                    </div>');
+                    redirect('admin/payment');
+                }
+            }
                 
 
             $data["paypal"]=$this->db->query("SELECT * FROM `paypal` where id = 1");
             $this->load->view("admin/payment/edit_paypal",$data);
-            }
-            else
-            {
-                redirect('admin');
-            }
+        }
+        else
+        {
+            redirect('admin');
+        }
          
     }
     
@@ -2618,8 +2763,8 @@ function delete_deal_product($id){
             }
             
 
-        $data["razor"]=$this->db->query("SELECT * FROM `razorpay` where id = 1");
-        $this->load->view("admin/payment/edit_razorpay",$data);
+            $data["razor"]=$this->db->query("SELECT * FROM `razorpay` where id = 1");
+            $this->load->view("admin/payment/edit_razorpay",$data);
         }
         else
         {
@@ -2627,6 +2772,7 @@ function delete_deal_product($id){
         }
          
     }
+
     public function ads(){
         if(_is_user_login($this))
         {
@@ -2638,8 +2784,8 @@ function delete_deal_product($id){
             {
                 redirect('admin');
             }
-         
     }
+
     public function edit_ads($id){
         if(_is_user_login($this)){
             $data["error"] = "";
@@ -2680,8 +2826,8 @@ function delete_deal_product($id){
             }
             
 
-        $data["ads"]=$this->db->query("SELECT * FROM `ads` where id ='".$id."'");
-        $this->load->view("admin/ads/edit_ads",$data);
+            $data["ads"]=$this->db->query("SELECT * FROM `ads` where id ='".$id."'");
+            $this->load->view("admin/ads/edit_ads",$data);
         }
         else
         {
@@ -2689,6 +2835,7 @@ function delete_deal_product($id){
         }
          
     }
+    
     public function user_action($user_id){
         if(_is_user_login($this)){
         
@@ -2713,8 +2860,22 @@ function delete_deal_product($id){
                 {
                     extract($_POST);
                     $status = ($this->input->post("status")=="on")? 1 : 0;
-                    $password=md5($password);
-                    $update=$this->db->query("UPDATE `registers` SET `user_phone`='".$phone."',`user_fullname`='".$name."',`user_email`='".$email."',`user_password`='".$password."',`socity_id`='".$society."',`house_no`='".$home."',status='".$status."' WHERE `user_id`='".$user_id."'");
+                    $this->db->select('user_password'); // Change it to what column name you have for id
+                      $this->db->from('registers');
+                      $this->db->where('user_id',$user_id ); // 'Yes' or 'yes', depending on what you have in db
+                      $query = $this->db->get();
+                      $pass= $query->row();
+                    
+                    if($pass->user_password==$password) 
+                    {
+                        $password_new=$password;
+                    }
+                    else
+                    {
+                        $password_new=md5($password);
+                    }
+                    
+                    $update=$this->db->query("UPDATE `registers` SET `user_phone`='".$phone."',`user_fullname`='".$name."',`user_email`='".$email."',`user_password`='".$password_new."',`socity_id`='".$society."',`house_no`='".$home."',status='".$status."' WHERE `user_id`='".$user_id."'");
                     if(!$update){
                         redirect('admin/registers');
                     }
@@ -2772,13 +2933,11 @@ function delete_deal_product($id){
             $data["user"] = $qry->result();
             $data["order"] = $this->product_model->get_sale_orders(" and sale.user_id = '".$user_id."' AND sale.status=4 ");
             $this->load->view("admin/registers/useraction",$data);
-            
         }
         else
-            {
-                redirect('admin');
-            }
-         
+        {
+            redirect('admin');
+        }
     }
     
     public function notification22(){
@@ -2790,7 +2949,7 @@ function delete_deal_product($id){
         }
         else
         {
-            echo "not Login";
+            redirect('admin');
         }
     
     }

@@ -35,7 +35,9 @@
             <!-- content -->
             <div class="content">
                 <div class="container-fluid">
-
+                    <?php if(isset($message) && $message!=""){
+                            echo $message;
+                        } ?>
                     <div class="row" style="margin-top: 50px;">
                         <div class="col-lg-3 col-md-6 col-sm-6">
                             <div class="card card-stats">

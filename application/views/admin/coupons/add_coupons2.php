@@ -2,7 +2,6 @@
 <html lang="en">
 
 
-<!-- Mirrored from demos.creative-tim.com/material-dashboard-pro/examples/forms/extended.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 20 Mar 2017 21:33:48 GMT -->
 <head>
     <meta charset="utf-8" />
     <link rel="apple-touch-icon" sizes="76x76" href="<?php echo base_url($this->config->item("new_theme")."/assets/img/apple-icon.png"); ?>" />
@@ -137,7 +136,7 @@
                                             <label class="col-md-3"></label>
                                             <div class="col-md-9">
                                                 <div class="form-group form-button">
-                                                    <input type="submit" name="addcatg" value="<?php echo $this->lang->line("Add Coupon");?>" class="btn btn-fill btn-rose" />
+                                                    <input type="submit" name="addcatg" value="<?php echo $this->lang->line("ADD COUPON");?>" class="btn btn-fill btn-rose" />
                                                 </div>
                                             </div>
                                         </div>
