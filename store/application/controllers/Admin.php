@@ -16,9 +16,9 @@ class Admin extends MY_Controller {
     }
 	public function index()
 	{
-// 		if(_is_user_login($this)){
-//             redirect(_get_user_redirect($this));
-//         }else{
+		if(_is_user_login($this)){
+            redirect(_get_user_redirect($this));
+        }else{
             
             $data = array("error"=>"");       
             if(isset($_POST))
@@ -82,7 +82,7 @@ class Admin extends MY_Controller {
             $data["active"] = "login";
             
             $this->load->view("admin/login",$data);
-        // }
+        }
 	}
     public function dashboard(){
         if(_is_user_login($this)){

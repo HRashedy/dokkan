@@ -22,7 +22,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-$config['base_url'] = 'http://dokkan/';
+$config['base_url'] = 'http://dokkanhouse.com/';
 $config['theme_admin'] = "theme/admin";
 $config['new_theme'] = "new_theme";
 

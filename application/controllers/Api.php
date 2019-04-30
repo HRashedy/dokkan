@@ -80,6 +80,7 @@ public function signup(){
                     $user_id =  $this->db->insert_id();  
                     $data["responce"] = true; 
                     $data["message"] = "User Register Sucessfully..";
+                    $data["arb_message"] = "العضو المسجل بنجاح";
                     
                   }                  
            
